@@ -1,3 +1,469 @@
-#heading {
-  color: blue;
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root {
+  --brand: #ff5200;
+  --brand-dark: #e04600;
+
+  --ink-900: #0f1115;
+  --ink-700: #3d4152;
+  --ink-500: #686b78;
+  --ink-300: #93959f;
+
+  --surface: #ffffff;
+  --page: #fbfbfc;
+  --line: #eceded;
+  --line-soft: #f2f3f4;
+
+  --rating-good: #1f7a3f;
+  --rating-average: #db7c07;
+  --rating-poor: #d13b3b;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 17, 21, 0.05);
+  --shadow-sm: 0 2px 8px rgba(15, 17, 21, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 17, 21, 0.1);
+  --shadow-lg: 0 16px 40px rgba(15, 17, 21, 0.14);
+
+  --shell: 1200px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-900);
+  background-color: var(--page);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul {
+  list-style: none;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+  padding: 0 40px;
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s var(--ease);
+}
+
+.logo:hover {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+.nav-items > ul {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-items > ul > li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink-700);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+.nav-items > ul > li:hover {
+  color: var(--brand);
+  background-color: rgba(255, 82, 0, 0.07);
+}
+
+.nav-items > ul > li .icon {
+  color: var(--ink-300);
+  transition: color 0.2s var(--ease);
+}
+
+.nav-items > ul > li:hover .icon {
+  color: var(--brand);
+}
+
+.nav-cart {
+  margin-left: 8px;
+  color: var(--surface) !important;
+  background-color: var(--ink-900);
+  font-weight: 600;
+}
+
+.nav-cart .icon {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.nav-cart:hover {
+  background-color: var(--brand) !important;
+  color: var(--surface) !important;
+}
+
+.nav-cart:hover .icon {
+  color: var(--surface) !important;
+}
+
+/* ============================================================
+   Body shell
+   ============================================================ */
+.body {
+  width: var(--shell);
+  margin: 0 auto;
+  padding: 48px 40px 88px;
+}
+
+/* ============================================================
+   Search
+   ============================================================ */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 560px;
+  padding: 17px 22px;
+  margin-bottom: 52px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  cursor: text;
+  transition:
+    border-color 0.22s var(--ease),
+    box-shadow 0.22s var(--ease),
+    transform 0.22s var(--ease);
+}
+
+.search:hover {
+  border-color: #dcdddf;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.search .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--brand);
+}
+
+.search-text {
+  font-size: 15px;
+  color: var(--ink-300);
+  letter-spacing: -0.1px;
+}
+
+/* ============================================================
+   Section heading
+   ============================================================ */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.section-title {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+}
+
+.section-count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-300);
+  padding: 4px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--surface);
+}
+
+/* ============================================================
+   Grid
+   ============================================================ */
+.res-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 26px 22px;
+}
+
+/* ============================================================
+   Restaurant card
+   ============================================================ */
+.res-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.28s var(--ease),
+    box-shadow 0.28s var(--ease),
+    border-color 0.28s var(--ease);
+}
+
+.res-card:hover {
+  transform: translateY(-6px);
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+}
+
+/* --- media --- */
+.res-card-img {
+  position: relative;
+  height: 168px;
+  background-color: var(--line-soft);
+  overflow: hidden;
+}
+
+.res-card-img > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+}
+
+.res-card:hover .res-card-img > img {
+  transform: scale(1.07);
+}
+
+/* gradient scrim so the offer text stays legible */
+.res-card-img::after {
+  content: "";
+  position: absolute;
+  inset: 40% 0 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  pointer-events: none;
+}
+
+.res-offer {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.res-offer-main {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.res-offer-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+
+/* classic Indian pure-veg mark */
+.veg-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--rating-good);
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.veg-badge::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--rating-good);
+}
+
+/* --- body --- */
+.res-card-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 18px 0;
+}
+
+.res-name {
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.35px;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.res-meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.res-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.res-rating .star {
+  font-size: 10.5px;
+  line-height: 1;
+}
+
+.res-rating.good {
+  background-color: var(--rating-good);
+}
+
+.res-rating.average {
+  background-color: var(--rating-average);
+}
+
+.res-rating.poor {
+  background-color: var(--rating-poor);
+}
+
+.res-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.res-time .icon {
+  width: 14px;
+  height: 14px;
+  color: var(--ink-300);
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: #c9cad0;
+}
+
+.res-cuisines {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin-bottom: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.res-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 0 15px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 12.5px;
+  color: var(--ink-300);
+}
+
+.res-footer > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.res-footer > span:last-child {
+  flex: none;
+  font-weight: 600;
+  color: var(--ink-700);
 }
