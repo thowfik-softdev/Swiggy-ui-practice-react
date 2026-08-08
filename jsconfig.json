@@ -6,6 +6,6 @@
     "jsx": "react-jsx",
     "checkJs": false
   },
-  "include": ["**/*.js"],
+  "include": ["**/*.js", "src/components/Header.js", "src/components/Body.js"],
   "exclude": ["node_modules", "dist", ".parcel-cache"]
 }

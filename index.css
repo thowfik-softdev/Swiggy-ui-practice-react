@@ -180,15 +180,22 @@ ul {
 }
 
 /* ============================================================
-   Search
+   Search + filter row
    ============================================================ */
+.search-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 44px;
+}
+
 .search {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 560px;
-  padding: 17px 22px;
-  margin-bottom: 52px;
+  padding: 15px 22px;
   background-color: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -196,14 +203,17 @@ ul {
   cursor: text;
   transition:
     border-color 0.22s var(--ease),
-    box-shadow 0.22s var(--ease),
-    transform 0.22s var(--ease);
+    box-shadow 0.22s var(--ease);
 }
 
 .search:hover {
   border-color: #dcdddf;
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+}
+
+/* focus-within lights up the whole bar when the input inside it is focused */
+.search:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(255, 82, 0, 0.12);
 }
 
 .search .icon {
@@ -212,10 +222,20 @@ ul {
   color: var(--brand);
 }
 
-.search-text {
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
   font-size: 15px;
-  color: var(--ink-300);
   letter-spacing: -0.1px;
+  color: var(--ink-900);
+}
+
+.search-input::placeholder {
+  color: var(--ink-300);
 }
 
 /* ============================================================
@@ -466,4 +486,63 @@ ul {
   flex: none;
   font-weight: 600;
   color: var(--ink-700);
+}
+
+/* ============================================================
+   Filter chips
+   ============================================================ */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-xs);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-700);
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.filter-btn:hover {
+  border-color: #dcdddf;
+  box-shadow: var(--shadow-sm);
+}
+
+/* the on state - tinted, and it grows the x icon that clears it */
+.filter-btn.active {
+  color: var(--brand);
+  border-color: var(--brand);
+  background-color: rgba(255, 82, 0, 0.07);
+  font-weight: 600;
+}
+
+.filter-btn.active:hover {
+  background-color: rgba(255, 82, 0, 0.13);
+  border-color: var(--brand);
+}
+
+.filter-btn .icon {
+  width: 15px;
+  height: 15px;
+  margin-right: -3px;
+  opacity: 0.75;
+}
+
+.filter-btn:hover .icon {
+  opacity: 1;
 }

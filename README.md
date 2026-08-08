@@ -6,14 +6,38 @@
 - File Watching Algorithm - written in C++
 - Caching - Faster Builds
 - Image Optimization
-- Minification 
+- Minification
 - Bundle
-- Compress 
+- Compress
 - Consistent Hasing
 - Code Splitting
 - Differential Bundling - support older browsers
 - Diagnostic
 - Error Handling
 - HTTPS
-- Tree Shaking - remove unused code 
+- Tree Shaking - remove unused code
 - Different build for dev and prod bundles
+
+/\*
+Header
+
+- Logo
+- Nav items
+
+Body
+
+- Search
+  -RestaurantContainer
+  - RestaurantCard
+    -Image
+    -Name of res
+    -Star rating
+    -Cuisine
+    -Time to Delivery
+
+Footer
+-Copyright
+-Links
+-Address
+-Contact
+\*/
