@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { AboutIcon, CartIcon, ContactIcon, HomeIcon } from "./Icons";
 import { LOGO_URL } from "../utils/constants";
 
 const Header = () => {
+  const [loginButton, setLoginButton] = useState("Login");
   return (
     <div className="header">
       <div className="logo-container">
@@ -25,6 +26,15 @@ const Header = () => {
           <li className="nav-cart">
             <CartIcon />
             Cart
+          </li>
+          <li className="nav-cart">
+            <button
+              onClick={() =>
+                setLoginButton(loginButton === "Login" ? "Logout" : "Login")
+              }
+            >
+              {loginButton}
+            </button>
           </li>
         </ul>
       </div>
