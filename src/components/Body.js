@@ -29,17 +29,21 @@ const Body = () => {
   // State Variable - super powerful variable - React will remember its value between re-renders
   // To create a super powerful variable, we need to use useState() hook
 
-  // Only two things are real state - the data we fetched, and whether the chip is on
+  // allRestaurants      - everything the API gave us, the source of truth
+  // filteredRestaurants - what is left after the search box
   const [allRestaurants, setAllRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // What we show is DERIVED from those two, so it does not need its own useState.
-  // It is recalculated on every render, which is exactly what we want - it can
-  // never go stale or drift out of sync with allRestaurants.
+  // The top rated chip is applied on top of the search result, and it is
+  // DERIVED rather than stored, so it can never drift out of sync.
   const visibleRestaurants = isFiltered
-    ? allRestaurants.filter((restaurant) => restaurant.info.avgRating > 4.5)
-    : allRestaurants;
+    ? filteredRestaurants.filter(
+        (restaurant) => restaurant.info.avgRating > 4.5,
+      )
+    : filteredRestaurants;
 
   useEffect(() => {
     fetchData();
@@ -59,6 +63,7 @@ const Body = () => {
       // guard: if the API shape changed and we found nothing, leave the list alone
       if (restaurants.length) {
         setAllRestaurants(restaurants);
+        setFilteredRestaurants(restaurants);
       }
     } catch (error) {
       console.error("Could not load restaurants", error);
@@ -75,8 +80,18 @@ const Body = () => {
         <div className="search">
           <SearchIcon />
           <input
-            className="search-input"
             type="text"
+            className="search-input"
+            value={searchText}
+            onChange={(event) => {
+              setSearchText(event.target.value);
+              const filteredResult = allRestaurants.filter((res) => {
+                return res.info.name
+                  .toLowerCase()
+                  .includes(event.target.value.toLowerCase());
+              });
+              setFilteredRestaurants(filteredResult);
+            }}
             placeholder="Search for restaurants, cuisines and dishes"
           />
         </div>
