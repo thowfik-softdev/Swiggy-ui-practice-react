@@ -3,10 +3,14 @@ import { SearchIcon, CloseIcon } from "./Icons";
 import RestaurantCard from "./RestaurantCard";
 import Skeleton, { RestaurantCardSkeleton } from "./Skeleton";
 import { SWIGGY_API_URL } from "../utils/constants";
+import { useDebounce } from "../utils/useDebounce";
 
 // how many placeholder cards to show while we wait
 const SKELETON_COUNT = 8;
 const CARD_IMAGE_HEIGHT = 168;
+
+// how long the user has to stop typing before we filter
+const SEARCH_DELAY = 300;
 
 // The API returns Swiggy's whole homepage layout, not just restaurants.
 // Several widgets are grid widgets, and TWO of them carry a restaurants array:
@@ -29,21 +33,28 @@ const Body = () => {
   // State Variable - super powerful variable - React will remember its value between re-renders
   // To create a super powerful variable, we need to use useState() hook
 
-  // allRestaurants      - everything the API gave us, the source of truth
-  // filteredRestaurants - what is left after the search box
+  // allRestaurants - everything the API gave us, the source of truth
+  // searchText     - exactly what is in the box right now, so typing stays instant
   const [allRestaurants, setAllRestaurants] = useState([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // The top rated chip is applied on top of the search result, and it is
-  // DERIVED rather than stored, so it can never drift out of sync.
-  const visibleRestaurants = isFiltered
-    ? filteredRestaurants.filter(
-        (restaurant) => restaurant.info.avgRating > 4.5,
-      )
-    : filteredRestaurants;
+  // Lags 300ms behind searchText. While the user is still typing this does not
+  // change, so we only filter once they pause.
+  const debouncedSearch = useDebounce(searchText, SEARCH_DELAY);
+
+  // Both the search and the top rated chip are DERIVED, never stored, so they
+  // can never drift out of sync with allRestaurants.
+  const query = debouncedSearch.trim().toLowerCase();
+
+  const visibleRestaurants = allRestaurants
+    .filter((restaurant) =>
+      query ? restaurant.info.name.toLowerCase().includes(query) : true,
+    )
+    .filter((restaurant) =>
+      isFiltered ? restaurant.info.avgRating > 4.5 : true,
+    );
 
   useEffect(() => {
     fetchData();
@@ -63,7 +74,6 @@ const Body = () => {
       // guard: if the API shape changed and we found nothing, leave the list alone
       if (restaurants.length) {
         setAllRestaurants(restaurants);
-        setFilteredRestaurants(restaurants);
       }
     } catch (error) {
       console.error("Could not load restaurants", error);
@@ -83,15 +93,7 @@ const Body = () => {
             type="text"
             className="search-input"
             value={searchText}
-            onChange={(event) => {
-              setSearchText(event.target.value);
-              const filteredResult = allRestaurants.filter((res) => {
-                return res.info.name
-                  .toLowerCase()
-                  .includes(event.target.value.toLowerCase());
-              });
-              setFilteredRestaurants(filteredResult);
-            }}
+            onChange={(event) => setSearchText(event.target.value)}
             placeholder="Search for restaurants, cuisines and dishes"
           />
         </div>
