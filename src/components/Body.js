@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { SearchIcon, CloseIcon } from "./Icons";
 import RestaurantCard from "./RestaurantCard";
 import Skeleton, { RestaurantCardSkeleton } from "./Skeleton";
@@ -129,10 +130,13 @@ const Body = () => {
               />
             ))
           : visibleRestaurants.map((restaurant) => (
-              <RestaurantCard
+              <Link
+                className="res-card-link"
                 key={restaurant.info.id}
-                restaurantData={restaurant}
-              />
+                to={`/restaurant/${restaurant.info.id}`}
+              >
+                <RestaurantCard restaurantData={restaurant} />
+              </Link>
             ))}
       </div>
     </div>
