@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AboutIcon, CartIcon, ContactIcon, HomeIcon } from "./Icons";
 import { LOGO_URL } from "../utils/constants";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [loginButton, setLoginButton] = useState("Login");
@@ -12,23 +13,32 @@ const Header = () => {
       <div className="nav-items">
         <ul>
           <li>
-            <HomeIcon />
-            Home
+            <Link className="nav-link" to="/">
+              <HomeIcon />
+              Home
+            </Link>
           </li>
           <li>
-            <AboutIcon />
-            About
+            <Link className="nav-link" to="/about">
+              <AboutIcon />
+              About
+            </Link>
           </li>
           <li>
-            <ContactIcon />
-            Contact
+            <Link className="nav-link" to="/contact">
+              <ContactIcon />
+              Contact
+            </Link>
           </li>
-          <li className="nav-cart">
-            <CartIcon />
-            Cart
+          <li>
+            <Link className="nav-link nav-cart" to="/cart">
+              <CartIcon />
+              Cart
+            </Link>
           </li>
-          <li className="nav-cart">
+          <li>
             <button
+              className="login-btn"
               onClick={() =>
                 setLoginButton(loginButton === "Login" ? "Logout" : "Login")
               }
