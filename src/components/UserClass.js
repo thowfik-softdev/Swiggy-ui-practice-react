@@ -4,10 +4,19 @@ import { ContactIcon, LocationIcon } from "./Icons";
 class UserClass extends Component {
   constructor(props) {
     super(props);
+
+    this.state = { count: 0 };
+    console.log(`${this.props.name} Child Constructor`);
+  }
+
+  componentDidMount() {
+    console.log(`${this.props.name} Child Mounted`);
   }
 
   render() {
     const { name } = this.props;
+    const { count } = this.state;
+    console.log(`${name} Child Rendered`);
     return (
       <div className="user-card">
         <div className="user-card-banner" />
@@ -15,6 +24,7 @@ class UserClass extends Component {
         <div className="user-card-body">
           <div className="user-avatar">TJ</div>
 
+          <h1>Count: {count}</h1>
           <h2 className="user-name">{name}</h2>
           <p className="user-role">Software Engineer</p>
 
@@ -31,6 +41,14 @@ class UserClass extends Component {
               thowfik.softdev@gmail.com
             </a>
           </div>
+
+          <button
+            onClick={() => {
+              this.setState({ count: count + 1 });
+            }}
+          >
+            Count Increase
+          </button>
         </div>
       </div>
     );
