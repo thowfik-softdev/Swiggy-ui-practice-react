@@ -5,14 +5,14 @@ import UserClass from "./UserClass";
 class About extends Component {
   constructor(props) {
     super(props);
-    console.log("Parent Component Constructor");
+    // console.log("Parent Component Constructor");
   }
 
   componentDidMount() {
-    console.log("Parent Component Mounted");
+    // console.log("Parent Component Mounted");
   }
   render() {
-    console.log("Parent Component Rendered");
+    // console.log("Parent Component Rendered");
     return (
       <div className="page">
         <header className="page-head">
@@ -24,9 +24,7 @@ class About extends Component {
         </header>
 
         <div className="about-layout">
-          {/* <User name="Thowfik Juhair (Function)" /> */}
-          <UserClass name="First" />
-          <UserClass name="Second" />
+          <UserClass />
         </div>
       </div>
     );

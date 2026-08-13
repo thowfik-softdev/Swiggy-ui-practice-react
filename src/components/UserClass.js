@@ -5,27 +5,49 @@ class UserClass extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { count: 0 };
-    console.log(`${this.props.name} Child Constructor`);
+    this.state = {
+      userInfo: {
+        name: "",
+        location: "",
+        avatar_url: "",
+      },
+    };
+    // console.log(`${this.props.name} Child Constructor`);
   }
 
-  componentDidMount() {
-    console.log(`${this.props.name} Child Mounted`);
+  async componentDidMount() {
+    // console.log(`${this.props.name} Child Mounted`);
+    const data = await fetch("https://api.github.com/users/thowfik-softdev");
+    const json = await data.json();
+    console.log(json);
+    this.setState({
+      userInfo: json,
+    });
+  }
+
+  componentDidUpdate() {
+    console.log("Child Component Updated");
+  }
+
+  componentWillUnmount() {
+    console.log("Child Component Unmounted");
   }
 
   render() {
-    const { name } = this.props;
-    const { count } = this.state;
-    console.log(`${name} Child Rendered`);
+    const { login, avatar_url } = this.state.userInfo;
+    // console.log(`${name} Child Rendered`);
     return (
       <div className="user-card">
         <div className="user-card-banner" />
 
         <div className="user-card-body">
-          <div className="user-avatar">TJ</div>
+          {/* avatar_url is empty until componentDidMount resolves, so fall
+              back to the initials rather than rendering a broken image */}
+          <div className="user-avatar">
+            {avatar_url ? <img src={avatar_url} alt={login} /> : "TJ"}
+          </div>
 
-          <h1>Count: {count}</h1>
-          <h2 className="user-name">{name}</h2>
+          <h2 className="user-name">{login}</h2>
           <p className="user-role">Software Engineer</p>
 
           <div className="user-meta">
@@ -41,14 +63,6 @@ class UserClass extends Component {
               thowfik.softdev@gmail.com
             </a>
           </div>
-
-          <button
-            onClick={() => {
-              this.setState({ count: count + 1 });
-            }}
-          >
-            Count Increase
-          </button>
         </div>
       </div>
     );
