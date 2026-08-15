@@ -1,0 +1,29 @@
+name: Bundle size
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  size:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Fails the job if any bundle is over its gzipped budget.
+      # Budgets live in scripts/check-bundle-size.mjs
+      - name: Check bundle size
+        run: npm run size

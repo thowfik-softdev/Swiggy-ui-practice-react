@@ -68,6 +68,13 @@ export const CloseIcon = () => (
   </Icon>
 );
 
+export const GroceryIcon = () => (
+  <Icon>
+    <path d="M4.5 7.5h15l-1.4 9.2a2 2 0 0 1-2 1.7H7.9a2 2 0 0 1-2-1.7L4.5 7.5Z" />
+    <path d="M9 7.5V6a3 3 0 0 1 6 0v1.5" />
+  </Icon>
+);
+
 export const LocationIcon = () => (
   <Icon>
     <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />

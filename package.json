@@ -5,6 +5,8 @@
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html",
+    "size": "node scripts/check-bundle-size.mjs",
+    "build:check": "npm run build && npm run size",
     "test": "jest"
   },
   "repository": {
