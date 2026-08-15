@@ -29,11 +29,18 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .grocery-banners {
+  .banner-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .grocery-perks {
+  .perks-strip,
+  .channel-grid,
+  .suggest-row,
+  .stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -109,20 +116,8 @@
     padding: 0 16px;
   }
 
-  /* search and filter stack instead of sitting side by side */
-  .search-filter-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    margin-bottom: 30px;
-  }
-
   .search {
     width: 100%;
-  }
-
-  .filter {
-    justify-content: flex-start;
   }
 
   .res-container {
@@ -134,8 +129,21 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .grocery-banners {
+  .banner-row {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pick-media {
+    width: 88px;
+    height: 88px;
+  }
+
+  .pick-tile {
+    width: 96px;
+  }
+
+  .picks-row {
+    gap: 18px;
   }
 
   .body,
@@ -155,8 +163,7 @@
     font-size: 24px;
   }
 
-  .section-title,
-  .grocery-section-title {
+  .section-title {
     font-size: 20px;
   }
 
@@ -174,11 +181,27 @@
   }
 
   .about-layout {
-    justify-content: stretch;
+    flex-direction: column;
+    align-items: center;
   }
 
   .user-card {
     width: 100%;
+    max-width: 380px;
+  }
+
+  /* the bill stops being sticky and drops below the items */
+  .cart-split,
+  .contact-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cart-bill {
+    position: static;
+  }
+
+  .suggest-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -195,9 +218,18 @@
     gap: 12px;
   }
 
-  .grocery-perks {
+  .perks-strip {
     grid-template-columns: minmax(0, 1fr);
     padding: 20px;
+  }
+
+  .pick-media {
+    width: 74px;
+    height: 74px;
+  }
+
+  .pick-tile {
+    width: 82px;
   }
 
   .header {
@@ -260,6 +292,36 @@
   .empty-state {
     padding-top: 48px;
   }
+
+  .channel-grid,
+  .feature-grid,
+  .suggest-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  /* the cart row stacks its controls under the text */
+  .cart-row {
+    flex-wrap: wrap;
+  }
+
+  .cart-row-right {
+    width: 100%;
+    justify-content: space-between;
+    padding-left: 80px;
+  }
 }
 
 /* ============================================================
@@ -299,7 +361,7 @@
   .nav-link,
   .login-btn,
   .filter-btn,
-  .grocery-chip {
+  .chip {
     min-height: 44px; /* the accepted minimum touch target */
   }
 

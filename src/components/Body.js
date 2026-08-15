@@ -7,6 +7,14 @@ import { SWIGGY_API_URL } from "../utils/constants";
 import { useDebounce } from "../utils/useDebounce";
 import { useOnlineStatus } from "../utils/useOnlineStatus";
 import { RestaurantMenu } from "../utils/lazyRoutes";
+import PromoBanners from "./PromoBanners";
+import PerksStrip from "./PerksStrip";
+import {
+  CUISINE_CHIPS,
+  HOME_BANNERS,
+  HOME_PERKS,
+  TOP_PICKS,
+} from "../utils/homeData";
 
 // how many placeholder cards to show while we wait
 const SKELETON_COUNT = 8;
@@ -98,7 +106,16 @@ const Body = () => {
 
   return (
     <div className="body">
-      <div className="search-filter-row">
+      {/* Same hero pattern as the grocery page - eyebrow, big title,
+          subtitle, then the search bar underneath */}
+      <header className="page-hero">
+        <span className="page-eyebrow">Food delivery</span>
+        <h1 className="page-title">Order food you actually want</h1>
+        <p className="page-subtitle">
+          The best restaurants near you, delivered hot. Search by name, or just
+          browse what is open right now.
+        </p>
+
         <div className="search">
           <SearchIcon />
           <input
@@ -107,23 +124,95 @@ const Body = () => {
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
             placeholder="Search for restaurants, cuisines and dishes"
+            aria-label="Search restaurants"
           />
+          {searchText && (
+            <button
+              className="search-clear"
+              onClick={() => setSearchText("")}
+              aria-label="Clear search"
+            >
+              <CloseIcon />
+            </button>
+          )}
         </div>
-        <div className="filter">
+      </header>
+
+      {/* Cuisine chips double as a one-tap search. Clicking one just sets
+          searchText, so it reuses the filtering that is already there. */}
+      <div className="chip-row">
+        <button
+          className={!isFiltered && !searchText ? "chip active" : "chip"}
+          onClick={() => {
+            setIsFiltered(false);
+            setSearchText("");
+          }}
+        >
+          <span className="chip-emoji">🍽️</span>
+          All
+        </button>
+
+        <button
+          className={isFiltered ? "chip active" : "chip"}
+          onClick={() => setIsFiltered(!isFiltered)}
+        >
+          <span className="chip-emoji">⭐</span>
+          Rating 4.5+
+        </button>
+
+        {CUISINE_CHIPS.map((cuisine) => (
           <button
-            className={isFiltered ? "filter-btn active" : "filter-btn"}
-            onClick={() => {
-              // the whole handler is now just a toggle - the list recalculates itself
-              setIsFiltered(!isFiltered);
-            }}
+            key={cuisine.id}
+            className={
+              searchText.toLowerCase() === cuisine.id ? "chip active" : "chip"
+            }
+            onClick={() =>
+              setSearchText(
+                searchText.toLowerCase() === cuisine.id ? "" : cuisine.id,
+              )
+            }
           >
-            Top Rated Restaurants
-            {isFiltered && <CloseIcon />}
+            <span className="chip-emoji">{cuisine.emoji}</span>
+            {cuisine.label}
           </button>
-        </div>
+        ))}
       </div>
+
+      <PromoBanners banners={HOME_BANNERS} />
+
+      {/* What are you craving - a tile grid of cuisines */}
+      <section className="picks-section">
+        <div className="section-head">
+          <div>
+            <h2 className="section-title">What's on your mind?</h2>
+            <p className="section-sub">Pick a craving, we will do the rest</p>
+          </div>
+        </div>
+
+        <div className="picks-row">
+          {TOP_PICKS.map((pick) => (
+            <button
+              className="pick-tile"
+              key={pick.id}
+              onClick={() => setSearchText(pick.title)}
+            >
+              <div className="pick-media">
+                <img src={pick.image} alt={pick.title} loading="lazy" />
+              </div>
+              <span className="pick-title">{pick.title}</span>
+              <span className="pick-sub">{pick.subtitle}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <div className="section-head">
-        <h2 className="section-title">Restaurants near you</h2>
+        <div>
+          <h2 className="section-title">Restaurants near you</h2>
+          <p className="section-sub">
+            {isFiltered ? "Only the highest rated" : "Everything open nearby"}
+          </p>
+        </div>
         {isLoading ? (
           <Skeleton width={82} height={26} radius={999} />
         ) : (
@@ -153,6 +242,29 @@ const Body = () => {
               </Link>
             ))}
       </div>
+
+      {!isLoading && visibleRestaurants.length === 0 && (
+        <div className="empty-state">
+          <span className="empty-state-icon">🔍</span>
+          <h3 className="empty-state-title">No restaurants match</h3>
+          <p className="empty-state-text">
+            Nothing here for{" "}
+            <strong>{debouncedSearch || "that filter"}</strong>. Try a different
+            search.
+          </p>
+          <button
+            className="empty-state-btn"
+            onClick={() => {
+              setSearchText("");
+              setIsFiltered(false);
+            }}
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
+
+      <PerksStrip perks={HOME_PERKS} />
     </div>
   );
 };

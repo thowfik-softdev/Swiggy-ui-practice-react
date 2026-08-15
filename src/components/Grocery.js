@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { SearchIcon, CloseIcon } from "./Icons";
 import { useDebounce } from "../utils/useDebounce";
+import PromoBanners from "./PromoBanners";
+import PerksStrip from "./PerksStrip";
 import {
   BANNERS,
   CATEGORIES,
@@ -15,26 +17,12 @@ const SEARCH_DELAY = 300;
    ------------------------------------------------------------------ */
 const CategoryChip = ({ category, isActive, onSelect }) => (
   <button
-    className={`grocery-chip ${isActive ? "active" : ""}`}
+    className={`chip ${isActive ? "active" : ""}`}
     onClick={() => onSelect(category.id)}
   >
-    <span className="grocery-chip-emoji">{category.emoji}</span>
+    <span className="chip-emoji">{category.emoji}</span>
     {category.label}
   </button>
-);
-
-/* ------------------------------------------------------------------
-   2. Promotional banner
-   ------------------------------------------------------------------ */
-const GroceryBanner = ({ banner }) => (
-  <article className="grocery-banner">
-    <img src={banner.image} alt={banner.title} loading="lazy" />
-    <div className="grocery-banner-body">
-      <span className="grocery-banner-cta">{banner.cta}</span>
-      <h3 className="grocery-banner-title">{banner.title}</h3>
-      <p className="grocery-banner-sub">{banner.subtitle}</p>
-    </div>
-  </article>
 );
 
 /* ------------------------------------------------------------------
@@ -85,12 +73,12 @@ const ProductCard = ({ product, quantity, onAdd, onRemove }) => {
    ------------------------------------------------------------------ */
 const ProductSection = ({ section, cart, onAdd, onRemove }) => (
   <section className="grocery-section" id={section.id}>
-    <div className="grocery-section-head">
+    <div className="section-head">
       <div>
-        <h2 className="grocery-section-title">{section.title}</h2>
-        <p className="grocery-section-sub">{section.subtitle}</p>
+        <h2 className="section-title">{section.title}</h2>
+        <p className="section-sub">{section.subtitle}</p>
       </div>
-      <span className="grocery-section-count">
+      <span className="section-count">
         {section.products.length} items
       </span>
     </div>
@@ -106,21 +94,6 @@ const ProductSection = ({ section, cart, onAdd, onRemove }) => (
         />
       ))}
     </div>
-  </section>
-);
-
-/* ------------------------------------------------------------------
-   5. Why shop with us strip
-   ------------------------------------------------------------------ */
-const PerksStrip = () => (
-  <section className="grocery-perks">
-    {PERKS.map((perk) => (
-      <div className="grocery-perk" key={perk.id}>
-        <span className="grocery-perk-icon">{perk.icon}</span>
-        <h4>{perk.title}</h4>
-        <p>{perk.text}</p>
-      </div>
-    ))}
   </section>
 );
 
@@ -170,7 +143,7 @@ const Grocery = () => {
   return (
     <div className="grocery-page">
       {/* hero */}
-      <header className="grocery-hero">
+      <header className="page-hero">
         <span className="page-eyebrow">Instamart</span>
         <h1 className="page-title">Groceries in 15 minutes</h1>
         <p className="page-subtitle">
@@ -178,7 +151,7 @@ const Grocery = () => {
           store minutes away from you.
         </p>
 
-        <div className="search grocery-search">
+        <div className="search">
           <SearchIcon />
           <input
             type="text"
@@ -189,7 +162,7 @@ const Grocery = () => {
           />
           {searchText && (
             <button
-              className="grocery-search-clear"
+              className="search-clear"
               onClick={() => setSearchText("")}
               aria-label="Clear search"
             >
@@ -200,12 +173,12 @@ const Grocery = () => {
       </header>
 
       {/* categories */}
-      <div className="grocery-chips">
+      <div className="chip-row">
         <button
-          className={`grocery-chip ${!activeCategory ? "active" : ""}`}
+          className={`chip ${!activeCategory ? "active" : ""}`}
           onClick={() => setActiveCategory(null)}
         >
-          <span className="grocery-chip-emoji">🛒</span>
+          <span className="chip-emoji">🛒</span>
           All
         </button>
 
@@ -222,11 +195,7 @@ const Grocery = () => {
       </div>
 
       {/* banners */}
-      <div className="grocery-banners">
-        {BANNERS.map((banner) => (
-          <GroceryBanner key={banner.id} banner={banner} />
-        ))}
-      </div>
+      <PromoBanners banners={BANNERS} />
 
       {/* product sections */}
       {visibleSections.length === 0 ? (
@@ -246,7 +215,7 @@ const Grocery = () => {
         ))
       )}
 
-      <PerksStrip />
+      <PerksStrip perks={PERKS} />
 
       {/* sticky cart bar, only once something is in it */}
       {itemCount > 0 && (
