@@ -2,6 +2,21 @@ import React, { Component } from "react";
 import User from "./User";
 import UserClass from "./UserClass";
 import PerksStrip from "./PerksStrip";
+import {
+  cardPad,
+  chip,
+  chipRow,
+  gridThree,
+  pageEyebrow,
+  pageSection,
+  pageShell,
+  pageSubtitle,
+  pageTitle,
+  sectionCount,
+  sectionHead,
+  sectionSub,
+  sectionTitle,
+} from "../utils/styles";
 
 const STATS = [
   { id: "st1", value: "8", label: "Episodes documented" },
@@ -14,7 +29,7 @@ const STACK = [
   { id: "s1", emoji: "⚛️", label: "React 19" },
   { id: "s2", emoji: "🧭", label: "React Router 7" },
   { id: "s3", emoji: "📦", label: "Parcel" },
-  { id: "s4", emoji: "🎨", label: "Plain CSS" },
+  { id: "s4", emoji: "🎨", label: "Tailwind CSS" },
   { id: "s5", emoji: "🪝", label: "Custom hooks" },
   { id: "s6", emoji: "🌐", label: "Swiggy API" },
 ];
@@ -60,7 +75,7 @@ const FEATURES = [
 
 const BUILD_PERKS = [
   { id: "bp1", icon: "📚", title: "Learning in public", text: "Every episode written up in full" },
-  { id: "bp2", icon: "🧪", title: "Built from scratch", text: "No component library, no CSS framework" },
+  { id: "bp2", icon: "🧪", title: "Built from scratch", text: "No component library, every component hand built" },
   { id: "bp3", icon: "🔬", title: "Measured, not guessed", text: "A bundle budget runs in CI" },
   { id: "bp4", icon: "🚀", title: "Still going", text: "New episode, new features, every week" },
 ];
@@ -78,11 +93,11 @@ class About extends Component {
   render() {
     // console.log("Parent Component Rendered");
     return (
-      <div className="page">
-        <header className="page-hero">
-          <span className="page-eyebrow">Who built this</span>
-          <h1 className="page-title">About</h1>
-          <p className="page-subtitle">
+      <div className={pageShell}>
+        <header className="mb-7">
+          <span className={pageEyebrow}>Who built this</span>
+          <h1 className={pageTitle}>About</h1>
+          <p className={pageSubtitle}>
             A food ordering app built while working through the Namaste React
             course — every feature written from scratch, and every episode
             documented along the way.
@@ -90,46 +105,46 @@ class About extends Component {
         </header>
 
         {/* stats */}
-        <section className="stat-row">
+        <section className="mb-11 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {STATS.map((stat) => (
-            <div className="stat" key={stat.id}>
-              <span className="stat-value">{stat.value}</span>
-              <span className="stat-label">{stat.label}</span>
+            <div className="flex flex-col gap-1 rounded-md border border-line bg-surface p-4 sm:p-[22px]" key={stat.id}>
+              <span className="text-2xl font-extrabold leading-none tracking-tight text-brand sm:text-3xl">{stat.value}</span>
+              <span className="text-[12.5px] text-ink-500">{stat.label}</span>
             </div>
           ))}
         </section>
 
         {/* the two cards - function vs class */}
-        <section className="page-section">
-          <div className="section-head">
+        <section className={pageSection}>
+          <div className={sectionHead}>
             <div>
-              <h2 className="section-title">The same card, twice</h2>
-              <p className="section-sub">
+              <h2 className={sectionTitle}>The same card, twice</h2>
+              <p className={sectionSub}>
                 One written as a function, one as a class — episode 8
               </p>
             </div>
-            <span className="section-count">2 components</span>
+            <span className={sectionCount}>2 components</span>
           </div>
 
-          <div className="about-layout">
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-stretch sm:justify-center">
             <User name="Function component" />
             <UserClass name="Class component" />
           </div>
         </section>
 
         {/* stack */}
-        <section className="page-section">
-          <div className="section-head">
+        <section className={pageSection}>
+          <div className={sectionHead}>
             <div>
-              <h2 className="section-title">Built with</h2>
-              <p className="section-sub">No UI library, no CSS framework</p>
+              <h2 className={sectionTitle}>Built with</h2>
+              <p className={sectionSub}>No UI library, no CSS framework</p>
             </div>
           </div>
 
-          <div className="chip-row">
+          <div className={chipRow}>
             {STACK.map((tech) => (
-              <span className="chip" key={tech.id}>
-                <span className="chip-emoji">{tech.emoji}</span>
+              <span className={chip} key={tech.id}>
+                <span className="text-base leading-none">{tech.emoji}</span>
                 {tech.label}
               </span>
             ))}
@@ -137,23 +152,23 @@ class About extends Component {
         </section>
 
         {/* features */}
-        <section className="page-section">
-          <div className="section-head">
+        <section className={pageSection}>
+          <div className={sectionHead}>
             <div>
-              <h2 className="section-title">What is in here</h2>
-              <p className="section-sub">
+              <h2 className={sectionTitle}>What is in here</h2>
+              <p className={sectionSub}>
                 The parts that took the longest to get right
               </p>
             </div>
-            <span className="section-count">{FEATURES.length} features</span>
+            <span className={sectionCount}>{FEATURES.length} features</span>
           </div>
 
-          <div className="feature-grid">
+          <div className={gridThree}>
             {FEATURES.map((feature) => (
-              <article className="feature-card" key={feature.id}>
-                <span className="feature-icon">{feature.icon}</span>
-                <h3 className="feature-title">{feature.title}</h3>
-                <p className="feature-text">{feature.text}</p>
+              <article className={`${cardPad} lift hover:-translate-y-1 hover:shadow-md`} key={feature.id}>
+                <span className="mb-3 block text-[26px]">{feature.icon}</span>
+                <h3 className="mb-1.5 text-[15.5px] font-bold tracking-tight">{feature.title}</h3>
+                <p className="text-[13px] leading-relaxed text-ink-500">{feature.text}</p>
               </article>
             ))}
           </div>

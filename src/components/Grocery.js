@@ -3,12 +3,25 @@ import { SearchIcon, CloseIcon } from "./Icons";
 import { useDebounce } from "../utils/useDebounce";
 import PromoBanners from "./PromoBanners";
 import PerksStrip from "./PerksStrip";
+import { BANNERS, CATEGORIES, PERKS, SECTIONS } from "../utils/groceryData";
 import {
-  BANNERS,
-  CATEGORIES,
-  PERKS,
-  SECTIONS,
-} from "../utils/groceryData";
+  btnGreen,
+  card,
+  chip,
+  chipActive,
+  chipRow,
+  gridProducts,
+  pageEyebrow,
+  pageShell,
+  pageSubtitle,
+  pageTitle,
+  searchBox,
+  searchInput,
+  sectionCount,
+  sectionHead,
+  sectionSub,
+  sectionTitle,
+} from "../utils/styles";
 
 const SEARCH_DELAY = 300;
 
@@ -17,49 +30,79 @@ const SEARCH_DELAY = 300;
    ------------------------------------------------------------------ */
 const CategoryChip = ({ category, isActive, onSelect }) => (
   <button
-    className={`chip ${isActive ? "active" : ""}`}
+    className={`${chip} ${isActive ? chipActive : ""}`}
     onClick={() => onSelect(category.id)}
   >
-    <span className="chip-emoji">{category.emoji}</span>
+    <span className="text-base leading-none">{category.emoji}</span>
     {category.label}
   </button>
 );
 
 /* ------------------------------------------------------------------
-   3. Product card - the smallest reusable piece
+   2. Product card - the smallest reusable piece
    ------------------------------------------------------------------ */
 const ProductCard = ({ product, quantity, onAdd, onRemove }) => {
   const { name, unit, price, mrp, rating, image } = product;
   const discount = Math.round(((mrp - price) / mrp) * 100);
 
   return (
-    <div className="grocery-card">
-      <div className="grocery-card-media">
-        {discount > 0 && <span className="grocery-discount">{discount}% OFF</span>}
-        <img src={image} alt={name} loading="lazy" />
+    <div className={card}>
+      <div className="relative h-[130px] bg-line-soft">
+        {discount > 0 && (
+          <span className="absolute left-2 top-2 z-10 rounded-md bg-rating-good px-[7px] py-[3px] text-[10px] font-bold tracking-wide text-white">
+            {discount}% OFF
+          </span>
+        )}
+        <img
+          className="block h-full w-full object-cover"
+          src={image}
+          alt={name}
+          loading="lazy"
+        />
       </div>
 
-      <div className="grocery-card-body">
-        <span className="grocery-unit">{unit}</span>
-        <h4 className="grocery-name">{name}</h4>
+      <div className="flex flex-1 flex-col p-3 pb-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-300">
+          {unit}
+        </span>
 
-        <span className="grocery-rating">★ {rating}</span>
+        <h4 className="my-1 line-clamp-2 min-h-[36px] text-[13.5px] font-semibold leading-tight tracking-tight">
+          {name}
+        </h4>
 
-        <div className="grocery-card-footer">
-          <div className="grocery-price">
-            <strong>₹{price}</strong>
-            {mrp > price && <s>₹{mrp}</s>}
+        {rating && (
+          <span className="self-start text-[11.5px] font-bold text-rating-good">
+            ★ {rating}
+          </span>
+        )}
+
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <div className="flex min-w-0 flex-col">
+            <strong className="text-[14.5px] font-bold">₹{price}</strong>
+            {mrp > price && <s className="text-[11.5px] text-ink-300">₹{mrp}</s>}
           </div>
 
           {quantity === 0 ? (
-            <button className="grocery-add" onClick={() => onAdd(product.id)}>
+            <button className={btnGreen} onClick={() => onAdd(product.id)}>
               ADD
             </button>
           ) : (
-            <div className="grocery-stepper">
-              <button onClick={() => onRemove(product.id)}>−</button>
-              <span>{quantity}</span>
-              <button onClick={() => onAdd(product.id)}>+</button>
+            <div className="inline-flex flex-none items-center overflow-hidden rounded-lg bg-rating-good">
+              <button
+                className="h-[30px] w-[26px] text-base font-bold leading-none text-white hover:bg-black/15"
+                onClick={() => onRemove(product.id)}
+              >
+                −
+              </button>
+              <span className="min-w-[20px] text-center text-[13px] font-bold text-white">
+                {quantity}
+              </span>
+              <button
+                className="h-[30px] w-[26px] text-base font-bold leading-none text-white hover:bg-black/15"
+                onClick={() => onAdd(product.id)}
+              >
+                +
+              </button>
             </div>
           )}
         </div>
@@ -69,21 +112,19 @@ const ProductCard = ({ product, quantity, onAdd, onRemove }) => {
 };
 
 /* ------------------------------------------------------------------
-   4. A titled row of products
+   3. A titled row of products
    ------------------------------------------------------------------ */
 const ProductSection = ({ section, cart, onAdd, onRemove }) => (
-  <section className="grocery-section" id={section.id}>
-    <div className="section-head">
+  <section className="mb-11" id={section.id}>
+    <div className={sectionHead}>
       <div>
-        <h2 className="section-title">{section.title}</h2>
-        <p className="section-sub">{section.subtitle}</p>
+        <h2 className={sectionTitle}>{section.title}</h2>
+        <p className={sectionSub}>{section.subtitle}</p>
       </div>
-      <span className="section-count">
-        {section.products.length} items
-      </span>
+      <span className={sectionCount}>{section.products.length} items</span>
     </div>
 
-    <div className="grocery-grid">
+    <div className={gridProducts}>
       {section.products.map((product) => (
         <ProductCard
           key={product.id}
@@ -98,12 +139,12 @@ const ProductSection = ({ section, cart, onAdd, onRemove }) => (
 );
 
 /* ------------------------------------------------------------------
-   6. The page
+   4. The page
    ------------------------------------------------------------------ */
 const Grocery = () => {
   const [searchText, setSearchText] = useState("");
   const [activeCategory, setActiveCategory] = useState(null);
-  const [cart, setCart] = useState({});   // { productId: quantity }
+  const [cart, setCart] = useState({}); // { productId: quantity }
 
   const debouncedSearch = useDebounce(searchText, SEARCH_DELAY);
   const query = debouncedSearch.trim().toLowerCase();
@@ -123,8 +164,9 @@ const Grocery = () => {
 
   // Everything below is DERIVED from the three state values above,
   // so nothing can drift out of sync - same rule as episode 6.
-  const visibleSections = SECTIONS
-    .filter((section) => !activeCategory || section.id === activeCategory)
+  const visibleSections = SECTIONS.filter(
+    (section) => !activeCategory || section.id === activeCategory,
+  )
     .map((section) => ({
       ...section,
       products: section.products.filter((product) =>
@@ -141,28 +183,28 @@ const Grocery = () => {
   );
 
   return (
-    <div className="grocery-page">
-      {/* hero */}
-      <header className="page-hero">
-        <span className="page-eyebrow">Instamart</span>
-        <h1 className="page-title">Groceries in 15 minutes</h1>
-        <p className="page-subtitle">
+    <div className={`${pageShell} pb-32`}>
+      <header className="mb-7">
+        <span className={pageEyebrow}>Instamart</span>
+        <h1 className={pageTitle}>Groceries in 15 minutes</h1>
+        <p className={pageSubtitle}>
           Fresh produce, daily essentials and midnight snacks, delivered from a
           store minutes away from you.
         </p>
 
-        <div className="search">
-          <SearchIcon />
+        <div className={`${searchBox} mt-6 w-full max-w-[620px]`}>
+          <SearchIcon className="h-5 w-5 text-brand" />
           <input
             type="text"
-            className="search-input"
+            className={searchInput}
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
             placeholder="Search for atta, milk, bananas…"
+            aria-label="Search groceries"
           />
           {searchText && (
             <button
-              className="search-clear"
+              className="flex-none text-ink-300 transition-colors hover:text-brand"
               onClick={() => setSearchText("")}
               aria-label="Clear search"
             >
@@ -172,13 +214,12 @@ const Grocery = () => {
         </div>
       </header>
 
-      {/* categories */}
-      <div className="chip-row">
+      <div className={chipRow}>
         <button
-          className={`chip ${!activeCategory ? "active" : ""}`}
+          className={`${chip} ${!activeCategory ? chipActive : ""}`}
           onClick={() => setActiveCategory(null)}
         >
-          <span className="chip-emoji">🛒</span>
+          <span className="text-base leading-none">🛒</span>
           All
         </button>
 
@@ -194,12 +235,10 @@ const Grocery = () => {
         ))}
       </div>
 
-      {/* banners */}
       <PromoBanners banners={BANNERS} />
 
-      {/* product sections */}
       {visibleSections.length === 0 ? (
-        <p className="grocery-empty">
+        <p className="py-12 text-[15px] text-ink-500">
           Nothing matches <strong>“{debouncedSearch}”</strong>. Try something
           else.
         </p>
@@ -219,12 +258,14 @@ const Grocery = () => {
 
       {/* sticky cart bar, only once something is in it */}
       {itemCount > 0 && (
-        <div className="grocery-cartbar">
+        <div className="fixed inset-x-3 bottom-3 z-30 flex items-center justify-between gap-5 rounded-full bg-ink-900 py-2.5 pl-6 pr-2.5 text-sm text-surface shadow-lg sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:justify-start">
           <span>
             <strong>{itemCount}</strong> {itemCount === 1 ? "item" : "items"}
           </span>
-          <span className="grocery-cartbar-total">₹{cartTotal}</span>
-          <button className="grocery-cartbar-btn">Checkout →</button>
+          <span className="font-bold">₹{cartTotal}</span>
+          <button className="rounded-full bg-brand px-[18px] py-2.5 text-[13.5px] font-bold text-white transition-colors hover:bg-brand-dark">
+            Checkout →
+          </button>
         </div>
       )}
     </div>

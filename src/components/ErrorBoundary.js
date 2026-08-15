@@ -39,21 +39,26 @@ class ErrorBoundary extends Component {
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <div className="page error-state">
-        <span className="error-state-icon">⚠️</span>
-        <h2 className="error-state-title">
+      <div className="mx-auto flex w-full max-w-shell flex-col items-center px-4 pb-24 pt-16 text-center md:px-10 md:pt-[90px]">
+        <span className="mb-4 text-[44px]">⚠️</span>
+        <h2 className="mb-2 text-2xl font-bold tracking-tight">
           {this.props.title ?? "Something went wrong"}
         </h2>
-        <p className="error-state-text">
+        <p className="max-w-[420px] text-[14.5px] leading-relaxed text-ink-500">
           {this.props.message ??
             "We could not load this page. Check your connection and try again."}
         </p>
 
         {this.state.error?.message && (
-          <code className="error-state-detail">{this.state.error.message}</code>
+          <code className="mt-4 block max-w-[520px] break-words rounded-sm border border-line bg-line-soft px-3.5 py-2.5 font-mono text-xs text-ink-500">
+            {this.state.error.message}
+          </code>
         )}
 
-        <button className="error-state-btn" onClick={this.handleRetry}>
+        <button
+          className="mt-[22px] rounded-full bg-ink-900 px-[22px] py-[11px] text-sm font-semibold text-surface transition-colors hover:bg-brand"
+          onClick={this.handleRetry}
+        >
           Try again
         </button>
       </div>

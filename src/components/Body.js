@@ -15,19 +15,32 @@ import {
   HOME_PERKS,
   TOP_PICKS,
 } from "../utils/homeData";
+import {
+  btnOutline,
+  chip,
+  chipActive,
+  chipRow,
+  emptyState,
+  gridCards,
+  pageEyebrow,
+  pageShell,
+  pageSubtitle,
+  pageTitle,
+  searchBox,
+  searchInput,
+  sectionCount,
+  sectionHead,
+  sectionSub,
+  sectionTitle,
+} from "../utils/styles";
 
-// how many placeholder cards to show while we wait
 const SKELETON_COUNT = 8;
-const CARD_IMAGE_HEIGHT = 168;
-
-// how long the user has to stop typing before we filter
+const CARD_IMAGE_HEIGHT = 152;
 const SEARCH_DELAY = 300;
 
 // The API returns Swiggy's whole homepage layout, not just restaurants.
-// Several widgets are grid widgets, and TWO of them carry a restaurants array:
-//   - "top_brands_for_you"  -> the logo carousel, widgetType WIDGET_TYPE_POPULAR_BRANDS
-//   - the main listing grid -> the one we actually want
-// Hardcoding cards[4] breaks whenever Swiggy reorders its widgets, so we search by shape.
+// TWO widgets carry a restaurants array, so we search by shape - hardcoding
+// cards[4] breaks whenever Swiggy reorders its widgets.
 const extractRestaurants = (json) => {
   const grids = (json?.data?.cards ?? [])
     .map((c) => c?.card?.card?.gridElements?.infoWithStyle)
@@ -41,25 +54,17 @@ const extractRestaurants = (json) => {
 };
 
 const Body = () => {
-  // State Variable - super powerful variable - React will remember its value between re-renders
-  // To create a super powerful variable, we need to use useState() hook
-
-  // allRestaurants - everything the API gave us, the source of truth
-  // searchText     - exactly what is in the box right now, so typing stays instant
   const [allRestaurants, setAllRestaurants] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { onlineStatus } = useOnlineStatus();
 
-  // Lags 300ms behind searchText. While the user is still typing this does not
-  // change, so we only filter once they pause.
   const debouncedSearch = useDebounce(searchText, SEARCH_DELAY);
-
-  // Both the search and the top rated chip are DERIVED, never stored, so they
-  // can never drift out of sync with allRestaurants.
   const query = debouncedSearch.trim().toLowerCase();
 
+  // Both the search and the chip are DERIVED, never stored, so they cannot
+  // drift out of sync with allRestaurants.
   const visibleRestaurants = allRestaurants
     .filter((restaurant) =>
       query ? restaurant.info.name.toLowerCase().includes(query) : true,
@@ -75,18 +80,10 @@ const Body = () => {
   const fetchData = async () => {
     try {
       const data = await fetch(SWIGGY_API_URL);
-      // const text = await data.text();
-      // const json = JSON.parse(text);
       const json = await data.json();
-      // const buf = await data.arrayBuffer();
-      // console.log(new Uint8Array(buf).slice(0, 15));
-
       const restaurants = extractRestaurants(json);
 
-      // guard: if the API shape changed and we found nothing, leave the list alone
-      if (restaurants.length) {
-        setAllRestaurants(restaurants);
-      }
+      if (restaurants.length) setAllRestaurants(restaurants);
     } catch (error) {
       console.error("Could not load restaurants", error);
     } finally {
@@ -98,29 +95,32 @@ const Body = () => {
 
   if (!onlineStatus) {
     return (
-      <div>
-        <h1>Looks like you're Offline</h1>
+      <div className={`${pageShell} flex flex-col items-center pt-16 text-center`}>
+        <span className="mb-4 text-[44px]">📡</span>
+        <h2 className="mb-2 text-2xl font-bold tracking-tight">You're offline</h2>
+        <p className="max-w-[420px] text-[14.5px] leading-relaxed text-ink-500">
+          Check your connection. This page will recover on its own once you are
+          back online.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="body">
-      {/* Same hero pattern as the grocery page - eyebrow, big title,
-          subtitle, then the search bar underneath */}
-      <header className="page-hero">
-        <span className="page-eyebrow">Food delivery</span>
-        <h1 className="page-title">Order food you actually want</h1>
-        <p className="page-subtitle">
+    <div className={pageShell}>
+      <header className="mb-7">
+        <span className={pageEyebrow}>Food delivery</span>
+        <h1 className={pageTitle}>Order food you actually want</h1>
+        <p className={pageSubtitle}>
           The best restaurants near you, delivered hot. Search by name, or just
           browse what is open right now.
         </p>
 
-        <div className="search">
-          <SearchIcon />
+        <div className={`${searchBox} mt-6 w-full max-w-[620px]`}>
+          <SearchIcon className="h-5 w-5 text-brand" />
           <input
             type="text"
-            className="search-input"
+            className={searchInput}
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
             placeholder="Search for restaurants, cuisines and dishes"
@@ -128,7 +128,7 @@ const Body = () => {
           />
           {searchText && (
             <button
-              className="search-clear"
+              className="flex-none text-ink-300 transition-colors hover:text-brand"
               onClick={() => setSearchText("")}
               aria-label="Clear search"
             >
@@ -138,41 +138,41 @@ const Body = () => {
         </div>
       </header>
 
-      {/* Cuisine chips double as a one-tap search. Clicking one just sets
-          searchText, so it reuses the filtering that is already there. */}
-      <div className="chip-row">
+      {/* Cuisine chips double as a one-tap search - they just set searchText,
+          reusing the filtering that is already there. */}
+      <div className={chipRow}>
         <button
-          className={!isFiltered && !searchText ? "chip active" : "chip"}
+          className={`${chip} ${!isFiltered && !searchText ? chipActive : ""}`}
           onClick={() => {
             setIsFiltered(false);
             setSearchText("");
           }}
         >
-          <span className="chip-emoji">🍽️</span>
+          <span className="text-base leading-none">🍽️</span>
           All
         </button>
 
         <button
-          className={isFiltered ? "chip active" : "chip"}
+          className={`${chip} ${isFiltered ? chipActive : ""}`}
           onClick={() => setIsFiltered(!isFiltered)}
         >
-          <span className="chip-emoji">⭐</span>
+          <span className="text-base leading-none">⭐</span>
           Rating 4.5+
         </button>
 
         {CUISINE_CHIPS.map((cuisine) => (
           <button
             key={cuisine.id}
-            className={
-              searchText.toLowerCase() === cuisine.id ? "chip active" : "chip"
-            }
+            className={`${chip} ${
+              searchText.toLowerCase() === cuisine.id ? chipActive : ""
+            }`}
             onClick={() =>
               setSearchText(
                 searchText.toLowerCase() === cuisine.id ? "" : cuisine.id,
               )
             }
           >
-            <span className="chip-emoji">{cuisine.emoji}</span>
+            <span className="text-base leading-none">{cuisine.emoji}</span>
             {cuisine.label}
           </button>
         ))}
@@ -180,80 +180,76 @@ const Body = () => {
 
       <PromoBanners banners={HOME_BANNERS} />
 
-      {/* What are you craving - a tile grid of cuisines */}
-      <section className="picks-section">
-        <div className="section-head">
+      <section className="mb-10">
+        <div className={sectionHead}>
           <div>
-            <h2 className="section-title">What's on your mind?</h2>
-            <p className="section-sub">Pick a craving, we will do the rest</p>
+            <h2 className={sectionTitle}>What's on your mind?</h2>
+            <p className={sectionSub}>Pick a craving, we will do the rest</p>
           </div>
         </div>
 
-        <div className="picks-row">
+        <div className="flex gap-4 overflow-x-auto pb-2 sm:gap-6">
           {TOP_PICKS.map((pick) => (
             <button
-              className="pick-tile"
+              className="group flex w-[82px] flex-none flex-col items-center gap-1 sm:w-[120px]"
               key={pick.id}
               onClick={() => setSearchText(pick.title)}
             >
-              <div className="pick-media">
-                <img src={pick.image} alt={pick.title} loading="lazy" />
+              <div className="h-[74px] w-[74px] overflow-hidden rounded-full border border-line bg-line-soft transition duration-[250ms] ease-smooth group-hover:-translate-y-1 group-hover:shadow-md sm:h-[108px] sm:w-[108px]">
+                <img
+                  className="block h-full w-full object-cover"
+                  src={pick.image}
+                  alt={pick.title}
+                  loading="lazy"
+                />
               </div>
-              <span className="pick-title">{pick.title}</span>
-              <span className="pick-sub">{pick.subtitle}</span>
+              <span className="mt-2 text-[13.5px] font-semibold text-ink-900">
+                {pick.title}
+              </span>
+              <span className="text-[11.5px] text-ink-300">{pick.subtitle}</span>
             </button>
           ))}
         </div>
       </section>
 
-      <div className="section-head">
+      <div className={sectionHead}>
         <div>
-          <h2 className="section-title">Restaurants near you</h2>
-          <p className="section-sub">
+          <h2 className={sectionTitle}>Restaurants near you</h2>
+          <p className={sectionSub}>
             {isFiltered ? "Only the highest rated" : "Everything open nearby"}
           </p>
         </div>
         {isLoading ? (
           <Skeleton width={82} height={26} radius={999} />
         ) : (
-          <span className="section-count">
+          <span className={sectionCount}>
             {visibleRestaurants.length} places
           </span>
         )}
       </div>
-      <div className="res-container">
-        {isLoading
-          ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-              <RestaurantCardSkeleton
-                key={index}
-                imageHeight={CARD_IMAGE_HEIGHT}
-              />
-            ))
-          : visibleRestaurants.map((restaurant) => (
-              <Link
-                className="res-card-link"
-                key={restaurant.info.id}
-                to={`/restaurant/${restaurant.info.id}`}
-                // warm the menu chunk while the pointer is still travelling
-                onMouseEnter={() => RestaurantMenu.preload()}
-                onFocus={() => RestaurantMenu.preload()}
-              >
-                <RestaurantCard restaurantData={restaurant} />
-              </Link>
-            ))}
-      </div>
 
-      {!isLoading && visibleRestaurants.length === 0 && (
-        <div className="empty-state">
-          <span className="empty-state-icon">🔍</span>
-          <h3 className="empty-state-title">No restaurants match</h3>
-          <p className="empty-state-text">
+      {isLoading ? (
+        <div className={gridCards}>
+          {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+            <RestaurantCardSkeleton
+              key={index}
+              imageHeight={CARD_IMAGE_HEIGHT}
+            />
+          ))}
+        </div>
+      ) : visibleRestaurants.length === 0 ? (
+        <div className={emptyState}>
+          <span className="mb-3.5 text-[38px]">🔍</span>
+          <h3 className="mb-1.5 text-[19px] font-bold tracking-tight">
+            No restaurants match
+          </h3>
+          <p className="max-w-[420px] text-sm leading-relaxed text-ink-500">
             Nothing here for{" "}
             <strong>{debouncedSearch || "that filter"}</strong>. Try a different
             search.
           </p>
           <button
-            className="empty-state-btn"
+            className={`${btnOutline} mt-5`}
             onClick={() => {
               setSearchText("");
               setIsFiltered(false);
@@ -261,6 +257,21 @@ const Body = () => {
           >
             Clear filters
           </button>
+        </div>
+      ) : (
+        <div className={gridCards}>
+          {visibleRestaurants.map((restaurant) => (
+            <Link
+              className="block min-w-0 no-underline"
+              key={restaurant.info.id}
+              to={`/restaurant/${restaurant.info.id}`}
+              // warm the menu chunk while the pointer is still travelling
+              onMouseEnter={() => RestaurantMenu.preload()}
+              onFocus={() => RestaurantMenu.preload()}
+            >
+              <RestaurantCard restaurantData={restaurant} />
+            </Link>
+          ))}
         </div>
       )}
 

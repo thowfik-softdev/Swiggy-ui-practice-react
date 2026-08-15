@@ -3,13 +3,19 @@ import { Link, useParams } from "react-router-dom";
 import { CDN_URL } from "../utils/constants";
 import { useRestaurantMenu } from "../utils/useRestaurantMenu";
 import { ClockIcon } from "./Icons";
-import Skeleton from "./Skeleton";
+import { MenuSkeleton } from "./Skeleton";
+import {
+  btnGreen,
+  pageShell,
+  ratingPill,
+  ratingTextTone,
+  ratingTone,
+  vegMark,
+  vegMarkTone,
+} from "../utils/styles";
 
 // Swiggy stores prices in paise, so 14900 means ₹149
 const toRupees = (paise) => `₹${Math.round(paise / 100)}`;
-
-const ratingTone = (rating) =>
-  rating >= 4 ? "good" : rating >= 3 ? "average" : "poor";
 
 /* ------------------------------------------------------------------
    One dish row
@@ -27,9 +33,8 @@ const MenuItem = ({ item }) => {
     itemAttribute,
   } = item?.card?.info ?? {};
 
-  // Not every dish has a photo, and Swiggy's CDN sometimes rejects the request.
-  // Track it so we can drop the image box entirely rather than leave a grey hole
-  // with the ADD button floating over nothing.
+  // Not every dish has a photo, and the CDN sometimes rejects the request.
+  // Track it so we can drop the image box rather than leave a grey hole.
   const [hasImage, setHasImage] = useState(Boolean(imageId));
 
   const rupees = toRupees(defaultPrice ?? price ?? 0);
@@ -38,16 +43,20 @@ const MenuItem = ({ item }) => {
   const soldOut = inStock === 0;
 
   return (
-    <div className={`menu-item ${soldOut ? "sold-out" : ""}`}>
-      <div className="menu-item-text">
-        <span className={`veg-mark ${isVeg ? "veg" : "nonveg"}`} />
+    <div
+      className={`flex flex-col gap-3.5 border-t border-line-soft py-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6 ${
+        soldOut ? "opacity-55" : ""
+      }`}
+    >
+      <div className="min-w-0 flex-1">
+        <span className={`${vegMark} ${vegMarkTone(isVeg)}`} />
 
-        <h4 className="menu-item-name">{name}</h4>
+        <h4 className="mb-1 text-base font-semibold tracking-tight">{name}</h4>
 
-        <p className="menu-item-price">
+        <p className="mb-1.5 text-[14.5px] font-semibold text-ink-700">
           {rupees}
           {itemAttribute?.portionSize && (
-            <span className="menu-item-portion">
+            <span className="font-normal text-ink-300">
               {" "}
               · {itemAttribute.portionSize}
             </span>
@@ -55,26 +64,48 @@ const MenuItem = ({ item }) => {
         </p>
 
         {rating && (
-          <span className={`menu-item-rating ${ratingTone(Number(rating))}`}>
-            <span className="star">★</span>
+          <span
+            className={`mb-2 inline-flex items-center gap-[3px] text-[12.5px] font-bold ${ratingTextTone(
+              Number(rating),
+            )}`}
+          >
+            <span className="text-[11px]">★</span>
             {rating}
-            {ratingCount && <span className="count"> ({ratingCount})</span>}
+            {ratingCount && (
+              <span className="font-medium text-ink-300"> ({ratingCount})</span>
+            )}
           </span>
         )}
 
-        {description && <p className="menu-item-desc">{description}</p>}
+        {description && (
+          <p className="line-clamp-2 text-[13px] leading-relaxed text-ink-500 sm:line-clamp-3">
+            {description}
+          </p>
+        )}
       </div>
 
-      <div className={`menu-item-media ${hasImage ? "" : "no-image"}`}>
+      <div
+        className={`relative flex-none ${
+          hasImage ? "w-full pb-[18px] sm:w-[104px] md:w-[140px]" : "w-auto"
+        }`}
+      >
         {hasImage && (
           <img
+            className="block h-[160px] w-full rounded-md bg-line-soft object-cover sm:h-[92px] md:h-[118px]"
             src={`${CDN_URL}${imageId}`}
             alt={name}
             loading="lazy"
             onError={() => setHasImage(false)}
           />
         )}
-        <button className="add-btn" disabled={soldOut}>
+        <button
+          className={`${btnGreen} min-w-[96px] shadow-sm ${
+            hasImage
+              ? "absolute bottom-0 left-1/2 -translate-x-1/2"
+              : "static w-full sm:w-auto"
+          }`}
+          disabled={soldOut}
+        >
           {soldOut ? "Sold out" : "ADD"}
         </button>
       </div>
@@ -86,47 +117,30 @@ const MenuItem = ({ item }) => {
    One collapsible category
    ------------------------------------------------------------------ */
 const MenuCategory = ({ title, items, isOpen, onToggle }) => (
-  <div className="menu-category">
-    <button className="menu-category-head" onClick={onToggle}>
+  <div className="border-b border-line">
+    <button
+      className="flex w-full items-center justify-between py-[18px] text-left text-[16.5px] font-bold text-ink-900 transition-colors hover:text-brand"
+      onClick={onToggle}
+    >
       <span>
         {title} ({items.length})
       </span>
-      <span className={`chevron ${isOpen ? "open" : ""}`}>⌄</span>
+      <span
+        className={`text-xl leading-none text-ink-500 transition-transform duration-[250ms] ease-smooth ${
+          isOpen ? "rotate-180" : ""
+        }`}
+      >
+        ⌄
+      </span>
     </button>
 
     {isOpen && (
-      <div className="menu-category-body">
+      <div className="pb-2">
         {items.map((item, index) => (
           <MenuItem key={item?.card?.info?.id ?? index} item={item} />
         ))}
       </div>
     )}
-  </div>
-);
-
-/* ------------------------------------------------------------------
-   Loading skeleton
-   ------------------------------------------------------------------ */
-const MenuSkeleton = () => (
-  <div className="menu-page">
-    <Skeleton width={220} height={14} />
-    <Skeleton width={280} height={34} radius={10} />
-    <Skeleton width="100%" height={260} radius={20} />
-    <div className="menu-meta-skeleton">
-      <Skeleton width={150} height={18} />
-      <Skeleton width={120} height={18} />
-    </div>
-    <Skeleton width={180} height={22} />
-    {[0, 1, 2].map((i) => (
-      <div className="menu-item" key={i}>
-        <div className="menu-item-text">
-          <Skeleton width="60%" height={17} />
-          <Skeleton width={70} height={14} />
-          <Skeleton width="90%" height={13} />
-        </div>
-        <Skeleton width={130} height={110} radius={14} />
-      </div>
-    ))}
   </div>
 );
 
@@ -148,11 +162,20 @@ const RestaurantMenu = () => {
 
   if (!restaurant) {
     return (
-      <div className="menu-page">
-        <h2 className="section-title">Menu not available</h2>
-        <p className="menu-empty">
-          We could not load this restaurant. <Link to="/">Go back home</Link>.
+      <div className={`${pageShell} flex flex-col items-center pt-16 text-center`}>
+        <span className="mb-4 text-[44px]">🍽️</span>
+        <h2 className="mb-2 text-2xl font-bold tracking-tight">
+          Menu not available
+        </h2>
+        <p className="mb-5 max-w-[420px] text-[14.5px] leading-relaxed text-ink-500">
+          We could not load this restaurant.
         </p>
+        <Link
+          className="rounded-full bg-ink-900 px-6 py-3 text-sm font-semibold text-surface no-underline transition-colors hover:bg-brand"
+          to="/"
+        >
+          Back to all restaurants
+        </Link>
       </div>
     );
   }
@@ -174,60 +197,76 @@ const RestaurantMenu = () => {
   const address = labels?.find((l) => l.title === "Address")?.message;
 
   return (
-    <div className="menu-page">
+    <div className={`${pageShell} flex flex-col gap-3.5`}>
       {/* breadcrumb */}
-      <nav className="crumbs">
-        <Link to="/">Home</Link>
+      <nav className="flex items-center gap-2 text-[12.5px] text-ink-300">
+        <Link className="text-ink-300 no-underline hover:text-brand" to="/">
+          Home
+        </Link>
         <span>/</span>
         <span>{city}</span>
         <span>/</span>
-        <strong>{name}</strong>
+        <strong className="font-semibold text-ink-900">{name}</strong>
       </nav>
 
-      <h1 className="menu-title">{name}</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight sm:text-[30px]">
+        {name}
+      </h1>
 
       {cloudinaryImageId && (
-        <div className="menu-hero">
-          <img src={`${CDN_URL}${cloudinaryImageId}`} alt={name} />
+        <div className="h-[180px] overflow-hidden rounded-lg border border-line bg-line-soft sm:h-[220px] lg:h-[280px]">
+          <img
+            className="h-full w-full object-cover"
+            src={`${CDN_URL}${cloudinaryImageId}`}
+            alt={name}
+          />
         </div>
       )}
 
       {/* rating / cost / cuisines / timings */}
-      <div className="menu-meta">
-        <div className="menu-meta-row">
-          <span className={`res-rating ${ratingTone(avgRating)}`}>
-            <span className="star">★</span>
+      <div className="flex flex-col gap-2 border-b border-line pb-[18px]">
+        <div className="flex items-center gap-2.5 text-[14.5px]">
+          <span className={`${ratingPill} ${ratingTone(avgRating)}`}>
+            <span className="text-[10.5px] leading-none">★</span>
             {avgRating}
           </span>
           {totalRatingsString && (
-            <span className="menu-meta-muted">({totalRatingsString})</span>
+            <span className="text-[13.5px] text-ink-300">
+              ({totalRatingsString})
+            </span>
           )}
-          <span className="dot" />
-          <span className="menu-meta-strong">{costForTwoMessage}</span>
+          <span className="h-[3px] w-[3px] rounded-full bg-[#c9cad0]" />
+          <span className="font-semibold text-ink-700">{costForTwoMessage}</span>
         </div>
 
         {cuisines?.length > 0 && (
-          <p className="menu-cuisines">{cuisines.join(", ")}</p>
+          <p className="text-[13.5px] font-medium text-brand underline underline-offset-[3px]">
+            {cuisines.join(", ")}
+          </p>
         )}
 
         {timingsInfo && (
-          <p className="menu-timings">
-            <span className="open-now">{timingsInfo.status}</span>
-            <span className="dot" />
+          <p className="flex items-center gap-2.5 text-[13.5px] text-ink-500">
+            <span className="font-semibold text-rating-good">
+              {timingsInfo.status}
+            </span>
+            <span className="h-[3px] w-[3px] rounded-full bg-[#c9cad0]" />
             {timingsInfo.message}
           </p>
         )}
 
-        <div className="menu-outlet">
+        <div className="mt-2 flex flex-col gap-1.5 border-l-2 border-line pl-3.5 text-[13.5px]">
           <div>
-            <span className="menu-outlet-label">Outlet</span>
-            <span className="menu-meta-muted">{areaName}</span>
+            <span className="mr-2.5 font-semibold">Outlet</span>
+            <span className="text-ink-300">{areaName}</span>
           </div>
-          <div className="menu-outlet-time">
-            <ClockIcon />
+          <div className="flex items-center gap-1.5 font-semibold text-ink-700">
+            <ClockIcon className="h-[15px] w-[15px] text-ink-300" />
             {sla?.slaString}
             {sla?.lastMileTravelString && (
-              <span className="menu-meta-muted"> · {sla.lastMileTravelString}</span>
+              <span className="font-normal text-ink-300">
+                · {sla.lastMileTravelString}
+              </span>
             )}
           </div>
         </div>
@@ -235,16 +274,25 @@ const RestaurantMenu = () => {
 
       {/* offers */}
       {offers.length > 0 && (
-        <section className="menu-section">
-          <h2 className="menu-section-title">Deals for you</h2>
-          <div className="offer-strip">
+        <section className="mt-5">
+          <h2 className="mb-3.5 text-xl font-bold tracking-tight">
+            Deals for you
+          </h2>
+          <div className="flex gap-3.5 overflow-x-auto pb-1.5">
             {offers.map((offer, index) => (
-              <div className="offer-card" key={index}>
+              <div
+                className="flex w-[210px] flex-none flex-col gap-[3px] rounded-md border border-line bg-surface px-4 py-3.5 shadow-xs transition-shadow hover:shadow-sm sm:w-[250px]"
+                key={index}
+              >
                 {offer?.info?.offerTag && (
-                  <span className="offer-tag">{offer.info.offerTag}</span>
+                  <span className="self-start rounded bg-brand-soft px-[7px] py-[2px] text-[10px] font-bold uppercase tracking-wider text-brand">
+                    {offer.info.offerTag}
+                  </span>
                 )}
-                <span className="offer-header">{offer?.info?.header}</span>
-                <span className="offer-sub">
+                <span className="text-base font-bold tracking-tight">
+                  {offer?.info?.header}
+                </span>
+                <span className="text-[11.5px] font-semibold uppercase tracking-wide text-ink-300">
                   {offer?.info?.couponCode ?? offer?.info?.description}
                 </span>
               </div>
@@ -254,10 +302,12 @@ const RestaurantMenu = () => {
       )}
 
       {/* the menu */}
-      <section className="menu-section">
-        <h2 className="menu-section-title">Menu</h2>
+      <section className="mt-5">
+        <h2 className="mb-3.5 text-xl font-bold tracking-tight">Menu</h2>
         {categories.length === 0 ? (
-          <p className="menu-empty">No items listed for this restaurant.</p>
+          <p className="text-[13.5px] leading-relaxed text-ink-500">
+            No items listed for this restaurant.
+          </p>
         ) : (
           categories.map((category, index) => (
             <MenuCategory
@@ -274,9 +324,11 @@ const RestaurantMenu = () => {
       </section>
 
       {address && (
-        <section className="menu-section">
-          <h2 className="menu-section-title">About {name}</h2>
-          <p className="menu-address">{address}</p>
+        <section className="mt-5">
+          <h2 className="mb-3.5 text-xl font-bold tracking-tight">
+            About {name}
+          </h2>
+          <p className="text-[13.5px] leading-relaxed text-ink-500">{address}</p>
         </section>
       )}
     </div>

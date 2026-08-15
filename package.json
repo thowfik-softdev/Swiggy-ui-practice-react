@@ -32,6 +32,8 @@
     "packageExports": true
   },
   "devDependencies": {
-    "parcel": "^2.16.1"
+    "parcel": "^2.16.1",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.19"
   }
 }

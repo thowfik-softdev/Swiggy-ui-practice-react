@@ -2,6 +2,24 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { CloseIcon } from "./Icons";
 import PerksStrip from "./PerksStrip";
+import {
+  btnGreen,
+  card,
+  emptyState,
+  notice,
+  noticeInfo,
+  pageEyebrow,
+  pageSection,
+  pageShell,
+  pageSubtitle,
+  pageTitle,
+  sectionCount,
+  sectionHead,
+  sectionSub,
+  sectionTitle,
+  vegMark,
+  vegMarkTone,
+} from "../utils/styles";
 
 // Seeded so the page has something to show. Real carts live in a store -
 // this is deliberately local, because cart state is not what this page is
@@ -64,35 +82,35 @@ const PLATFORM_FEE = 6;
    One line in the cart
    ------------------------------------------------------------------ */
 const CartRow = ({ item, onAdd, onRemove, onDelete }) => (
-  <div className="cart-row">
-    <img className="cart-row-img" src={item.image} alt={item.name} loading="lazy" />
+  <div className="flex flex-wrap items-center gap-4 border-b border-line-soft py-4">
+    <img className="h-16 w-16 flex-none rounded-sm bg-line-soft object-cover" src={item.image} alt={item.name} loading="lazy" />
 
-    <div className="cart-row-text">
-      <span className={`veg-mark ${item.isVeg ? "veg" : "nonveg"}`} />
-      <h4 className="cart-row-name">{item.name}</h4>
-      <p className="cart-row-meta">
+    <div className="min-w-0 flex-1">
+      <span className={`${vegMark} ${vegMarkTone(item.isVeg)}`} />
+      <h4 className="mb-[3px] mt-1.5 text-[14.5px] font-semibold">{item.name}</h4>
+      <p className="text-xs text-ink-300">
         {item.restaurant} · {item.unit}
       </p>
     </div>
 
-    <div className="cart-row-right">
-      <div className="cart-stepper">
-        <button onClick={() => onRemove(item.id)} aria-label="Remove one">−</button>
-        <span>{item.quantity}</span>
-        <button onClick={() => onAdd(item.id)} aria-label="Add one">+</button>
+    <div className="flex w-full flex-none items-center justify-between gap-4 sm:w-auto sm:justify-start">
+      <div className="inline-flex items-center overflow-hidden rounded-lg border border-rating-good">
+        <button className="h-[30px] w-7 text-[15px] font-bold text-rating-good hover:bg-rating-good/10" onClick={() => onRemove(item.id)} aria-label="Remove one">−</button>
+        <span className="min-w-[22px] text-center text-[13px] font-bold text-rating-good">{item.quantity}</span>
+        <button className="h-[30px] w-7 text-[15px] font-bold text-rating-good hover:bg-rating-good/10" onClick={() => onAdd(item.id)} aria-label="Add one">+</button>
       </div>
 
-      <div className="cart-row-price">
-        <strong>₹{item.price * item.quantity}</strong>
-        {item.mrp > item.price && <s>₹{item.mrp * item.quantity}</s>}
+      <div className="flex min-w-[74px] flex-col items-end">
+        <strong className="text-[14.5px] font-bold">₹{item.price * item.quantity}</strong>
+        {item.mrp > item.price && <s className="text-[11.5px] text-ink-300">₹{item.mrp * item.quantity}</s>}
       </div>
 
       <button
-        className="cart-row-delete"
+        className="text-ink-300 transition-colors hover:text-rating-poor"
         onClick={() => onDelete(item.id)}
         aria-label={`Remove ${item.name}`}
       >
-        <CloseIcon />
+        <CloseIcon className="h-4 w-4" />
       </button>
     </div>
   </div>
@@ -130,11 +148,11 @@ const Cart = () => {
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <div className="page">
-      <header className="page-hero">
-        <span className="page-eyebrow">Almost there</span>
-        <h1 className="page-title">Your cart</h1>
-        <p className="page-subtitle">
+    <div className={pageShell}>
+      <header className="mb-7">
+        <span className={pageEyebrow}>Almost there</span>
+        <h1 className={pageTitle}>Your cart</h1>
+        <p className={pageSubtitle}>
           {items.length
             ? `${itemCount} ${itemCount === 1 ? "item" : "items"} from Pizza Hut, Chhindwara City.`
             : "Nothing here yet — but that is easily fixed."}
@@ -142,26 +160,26 @@ const Cart = () => {
       </header>
 
       {items.length === 0 ? (
-        <div className="empty-state">
-          <span className="empty-state-icon">🛒</span>
-          <h3 className="empty-state-title">Your cart is empty</h3>
-          <p className="empty-state-text">
+        <div className={emptyState}>
+          <span className="mb-3.5 text-[38px]">🛒</span>
+          <h3 className="mb-1.5 text-[19px] font-bold tracking-tight">Your cart is empty</h3>
+          <p className="max-w-[420px] text-sm leading-relaxed text-ink-500">
             Add something from a restaurant and it will show up here.
           </p>
-          <Link className="empty-state-btn" to="/">
+          <Link className="mt-5 rounded-full border border-line bg-surface px-5 py-2.5 text-[13.5px] font-semibold text-ink-700 no-underline transition-colors hover:border-brand hover:text-brand" to="/">
             Browse restaurants
           </Link>
         </div>
       ) : (
-        <div className="cart-split">
+        <div className="mb-11 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.6fr_1fr]">
           {/* items */}
-          <section className="cart-items">
-            <div className="section-head">
+          <section className="min-w-0">
+            <div className={sectionHead}>
               <div>
-                <h2 className="section-title">Order summary</h2>
-                <p className="section-sub">Pizza Hut · 45–50 mins</p>
+                <h2 className={sectionTitle}>Order summary</h2>
+                <p className={sectionSub}>Pizza Hut · 45–50 mins</p>
               </div>
-              <span className="section-count">{itemCount} items</span>
+              <span className={sectionCount}>{itemCount} items</span>
             </div>
 
             {items.map((item) => (
@@ -175,48 +193,48 @@ const Cart = () => {
             ))}
 
             {toFreeDelivery > 0 && (
-              <p className="notice notice-info">
+              <p className={`${notice} ${noticeInfo}`}>
                 Add <strong>₹{toFreeDelivery}</strong> more to get free delivery.
               </p>
             )}
           </section>
 
           {/* bill */}
-          <aside className="cart-bill">
-            <h3 className="bill-title">Bill details</h3>
+          <aside className="rounded-lg border border-line bg-surface p-6 shadow-xs lg:sticky lg:top-24">
+            <h3 className="mb-4 border-b border-line pb-3.5 text-base font-bold">Bill details</h3>
 
-            <div className="bill-row">
+            <div className="flex items-center justify-between gap-3 py-[7px] text-[13.5px] text-ink-500">
               <span>Item total</span>
               <span>₹{itemTotal}</span>
             </div>
 
-            <div className="bill-row">
+            <div className="flex items-center justify-between gap-3 py-[7px] text-[13.5px] text-ink-500">
               <span>Delivery fee</span>
-              <span className={deliveryFee === 0 ? "bill-free" : ""}>
+              <span className={deliveryFee === 0 ? "font-bold text-rating-good" : ""}>
                 {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
               </span>
             </div>
 
-            <div className="bill-row">
+            <div className="flex items-center justify-between gap-3 py-[7px] text-[13.5px] text-ink-500">
               <span>Platform fee</span>
               <span>₹{PLATFORM_FEE}</span>
             </div>
 
             {savings > 0 && (
-              <div className="bill-row bill-savings">
+              <div className="flex items-center justify-between gap-3 py-[7px] text-[13.5px] font-semibold text-rating-good">
                 <span>Savings</span>
                 <span>−₹{savings}</span>
               </div>
             )}
 
-            <div className="bill-row bill-total">
+            <div className="mt-2.5 flex items-center justify-between gap-3 border-t border-line pt-3.5 text-base font-extrabold text-ink-900">
               <span>To pay</span>
               <span>₹{grandTotal}</span>
             </div>
 
-            <button className="bill-cta">Proceed to pay ₹{grandTotal}</button>
+            <button className="mt-[18px] w-full rounded-full bg-rating-good py-3.5 text-[14.5px] font-bold text-white transition hover:brightness-110">Proceed to pay ₹{grandTotal}</button>
 
-            <p className="bill-note">
+            <p className="mt-3 text-center text-xs text-rating-good">
               You save <strong>₹{savings}</strong> on this order
             </p>
           </aside>
@@ -224,23 +242,23 @@ const Cart = () => {
       )}
 
       {/* suggestions */}
-      <section className="page-section">
-        <div className="section-head">
+      <section className={pageSection}>
+        <div className={sectionHead}>
           <div>
-            <h2 className="section-title">People also added</h2>
-            <p className="section-sub">Goes well with what you have</p>
+            <h2 className={sectionTitle}>People also added</h2>
+            <p className={sectionSub}>Goes well with what you have</p>
           </div>
         </div>
 
-        <div className="suggest-row">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {SUGGESTIONS.map((s) => (
-            <div className="suggest-card" key={s.id}>
-              <img src={s.image} alt={s.name} loading="lazy" />
-              <div className="suggest-body">
-                <h4>{s.name}</h4>
-                <div className="suggest-footer">
-                  <strong>₹{s.price}</strong>
-                  <button className="suggest-add">ADD</button>
+            <div className={card} key={s.id}>
+              <img className="block h-[118px] w-full bg-line-soft object-cover" src={s.image} alt={s.name} loading="lazy" />
+              <div className="px-3.5 pb-3.5 pt-3">
+                <h4 className="mb-2.5 truncate text-[13.5px] font-semibold">{s.name}</h4>
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="text-sm font-bold">₹{s.price}</strong>
+                  <button className={btnGreen}>ADD</button>
                 </div>
               </div>
             </div>

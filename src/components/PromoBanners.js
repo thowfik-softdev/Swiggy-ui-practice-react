@@ -2,24 +2,38 @@ import React from "react";
 
 /**
  * A horizontal strip of promo cards - image, gradient scrim, text on top.
- *
- * Lifted out of Grocery so the home page and any future page can use the same
- * component instead of a second copy that slowly drifts out of style.
+ * Shared by the home page and the grocery page.
  */
 const PromoBanners = ({ banners }) => {
   if (!banners?.length) return null;
 
   return (
-    <div className="banner-row">
+    <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {banners.map((banner) => (
-        <article className="promo-banner" key={banner.id}>
-          <img src={banner.image} alt={banner.title} loading="lazy" />
-          <div className="promo-banner-body">
+        <article
+          className="group relative h-[190px] cursor-pointer overflow-hidden rounded-lg border border-line"
+          key={banner.id}
+        >
+          <img
+            className="block h-full w-full object-cover transition-transform duration-500 ease-smooth group-hover:scale-[1.06]"
+            src={banner.image}
+            alt={banner.title}
+            loading="lazy"
+          />
+
+          {/* scrim so the text stays legible over any photo */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/[0.78] via-black/15 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 z-10 p-[18px] text-white">
             {banner.cta && (
-              <span className="promo-banner-cta">{banner.cta}</span>
+              <span className="mb-2 inline-block rounded-md bg-brand px-[9px] py-[3px] text-[11px] font-bold uppercase tracking-wider">
+                {banner.cta}
+              </span>
             )}
-            <h3 className="promo-banner-title">{banner.title}</h3>
-            <p className="promo-banner-sub">{banner.subtitle}</p>
+            <h3 className="text-[19px] font-bold tracking-tight">
+              {banner.title}
+            </h3>
+            <p className="text-[13px] opacity-85">{banner.subtitle}</p>
           </div>
         </article>
       ))}
