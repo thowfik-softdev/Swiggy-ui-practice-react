@@ -6,6 +6,7 @@ import Skeleton, { RestaurantCardSkeleton } from "./Skeleton";
 import { SWIGGY_API_URL } from "../utils/constants";
 import { useDebounce } from "../utils/useDebounce";
 import { useOnlineStatus } from "../utils/useOnlineStatus";
+import { RestaurantMenu } from "../utils/lazyRoutes";
 
 // how many placeholder cards to show while we wait
 const SKELETON_COUNT = 8;
@@ -144,6 +145,9 @@ const Body = () => {
                 className="res-card-link"
                 key={restaurant.info.id}
                 to={`/restaurant/${restaurant.info.id}`}
+                // warm the menu chunk while the pointer is still travelling
+                onMouseEnter={() => RestaurantMenu.preload()}
+                onFocus={() => RestaurantMenu.preload()}
               >
                 <RestaurantCard restaurantData={restaurant} />
               </Link>
