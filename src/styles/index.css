@@ -1,0 +1,28 @@
+/**
+ * The single stylesheet the app imports. Everything else is split by AREA, so
+ * changing the menu page means opening a 400 line file rather than scrolling
+ * through 1,700.
+ *
+ * ORDER MATTERS. CSS cascade is top to bottom, so:
+ *   1. tokens   - the variables everything else reads
+ *   2. base     - the reset and element defaults
+ *   3. layout   - the header and page shells
+ *   4. features - one file per screen
+ *   5. shared   - skeletons, which must be able to override feature styles
+ *
+ * Parcel inlines all of these into one bundle at build time, so the split
+ * costs nothing at runtime - it is purely for the humans.
+ */
+
+@import "./tokens.css";
+@import "./base.css";
+
+@import "./header.css";
+@import "./page.css";
+
+@import "./home.css";
+@import "./menu.css";
+@import "./grocery.css";
+
+@import "./skeleton.css";
+@import "./responsive.css";
