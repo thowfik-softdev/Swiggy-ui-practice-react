@@ -5,6 +5,7 @@ import RestaurantCard from "./RestaurantCard";
 import Skeleton, { RestaurantCardSkeleton } from "./Skeleton";
 import { SWIGGY_API_URL } from "../utils/constants";
 import { useDebounce } from "../utils/useDebounce";
+import { useOnlineStatus } from "../utils/useOnlineStatus";
 
 // how many placeholder cards to show while we wait
 const SKELETON_COUNT = 8;
@@ -40,6 +41,7 @@ const Body = () => {
   const [searchText, setSearchText] = useState("");
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { onlineStatus } = useOnlineStatus();
 
   // Lags 300ms behind searchText. While the user is still typing this does not
   // change, so we only filter once they pause.
@@ -84,6 +86,14 @@ const Body = () => {
       setIsLoading(false);
     }
   };
+
+  if (!onlineStatus) {
+    return (
+      <div>
+        <h1>Looks like you're Offline</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="body">
