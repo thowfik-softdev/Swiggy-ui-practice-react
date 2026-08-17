@@ -35,10 +35,12 @@ const RestaurantCard = ({ restaurantData }) => {
           />
         )}
 
-        {/* a small green badge, not a gradient scrim across the photo */}
+        {/* Offer sits at the BOTTOM of the image, where Swiggy puts it. The
+            top-left corner is reserved for the Top Rated ribbon, so keeping
+            them apart means they can never collide. */}
         {offer.header && (
-          <div className="absolute left-2 top-2 z-10 inline-flex items-baseline gap-1 rounded-md bg-rating-good px-[9px] py-1 text-white">
-            <span className="text-[11px] font-bold uppercase tracking-wide">
+          <div className="absolute inset-x-0 bottom-0 z-10 flex items-baseline gap-1 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6 text-white">
+            <span className="text-[13px] font-extrabold uppercase tracking-tight">
               {offer.header}
             </span>
             {offer.subHeader && (
@@ -80,6 +82,31 @@ const RestaurantCard = ({ restaurantData }) => {
       </div>
     </div>
   );
+};
+
+/**
+ * Higher Order Component - takes a component, returns an enhanced one.
+ *
+ * The HOC adds ONE thing (the ribbon) and passes everything else straight
+ * through with {...props}. That is the whole contract: it must not know or
+ * care what the wrapped component needs.
+ */
+export const withTopRatedLabel = (RestaurantCard) => {
+  return (props) => {
+    const isTopRated = props?.restaurantData?.info?.avgRating >= 4.3;
+
+    return (
+      // relative, so the absolutely positioned ribbon anchors to this box
+      <div className="relative h-full">
+        {isTopRated && (
+          <span className="absolute left-2 top-2 z-20 rounded-md bg-ink-900/90 px-2 py-1 text-[9.5px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-sm">
+            ★ Top Rated
+          </span>
+        )}
+        <RestaurantCard {...props} />
+      </div>
+    );
+  };
 };
 
 export default RestaurantCard;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchIcon, CloseIcon } from "./Icons";
-import RestaurantCard from "./RestaurantCard";
+import RestaurantCard, { withTopRatedLabel } from "./RestaurantCard";
 import Skeleton, { RestaurantCardSkeleton } from "./Skeleton";
 import { SWIGGY_API_URL } from "../utils/constants";
 import { useDebounce } from "../utils/useDebounce";
@@ -53,6 +53,11 @@ const extractRestaurants = (json) => {
   return (mainListing ?? grids[0])?.restaurants ?? [];
 };
 
+// MODULE level, not inside Body. Calling the HOC during render would create a
+// brand new component TYPE on every render - React compares types by identity,
+// so it would unmount and remount every card each time.
+const RestaurantCardPromoted = withTopRatedLabel(RestaurantCard);
+
 const Body = () => {
   const [allRestaurants, setAllRestaurants] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -95,9 +100,13 @@ const Body = () => {
 
   if (!onlineStatus) {
     return (
-      <div className={`${pageShell} flex flex-col items-center pt-16 text-center`}>
+      <div
+        className={`${pageShell} flex flex-col items-center pt-16 text-center`}
+      >
         <span className="mb-4 text-[44px]">📡</span>
-        <h2 className="mb-2 text-2xl font-bold tracking-tight">You're offline</h2>
+        <h2 className="mb-2 text-2xl font-bold tracking-tight">
+          You're offline
+        </h2>
         <p className="max-w-[420px] text-[14.5px] leading-relaxed text-ink-500">
           Check your connection. This page will recover on its own once you are
           back online.
@@ -206,7 +215,9 @@ const Body = () => {
               <span className="mt-2 text-[13.5px] font-semibold text-ink-900">
                 {pick.title}
               </span>
-              <span className="text-[11.5px] text-ink-300">{pick.subtitle}</span>
+              <span className="text-[11.5px] text-ink-300">
+                {pick.subtitle}
+              </span>
             </button>
           ))}
         </div>
@@ -244,9 +255,8 @@ const Body = () => {
             No restaurants match
           </h3>
           <p className="max-w-[420px] text-sm leading-relaxed text-ink-500">
-            Nothing here for{" "}
-            <strong>{debouncedSearch || "that filter"}</strong>. Try a different
-            search.
+            Nothing here for <strong>{debouncedSearch || "that filter"}</strong>
+            . Try a different search.
           </p>
           <button
             className={`${btnOutline} mt-5`}
@@ -269,7 +279,11 @@ const Body = () => {
               onMouseEnter={() => RestaurantMenu.preload()}
               onFocus={() => RestaurantMenu.preload()}
             >
-              <RestaurantCard restaurantData={restaurant} />
+              {restaurant.info.avgRating >= 4.3 ? (
+                <RestaurantCardPromoted restaurantData={restaurant} />
+              ) : (
+                <RestaurantCard restaurantData={restaurant} />
+              )}
             </Link>
           ))}
         </div>
