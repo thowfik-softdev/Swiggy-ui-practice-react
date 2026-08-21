@@ -14,14 +14,18 @@ import { GrocerySkeleton, MenuSkeleton } from "./components/Skeleton";
 // Code-split routes. Defined in one shared module so the Header can preload
 // the exact same chunks the router will render.
 import { Grocery, RestaurantMenu } from "./utils/lazyRoutes";
+import { Provider } from "react-redux";
+import appStore from "./utils/redux/appStore";
 
 const AppLayout = () => {
   return (
-    <div className="app">
-      {/* Header - This can be called as <Header /> and also {Header()}*/}
-      <Header />
-      <Outlet />
-    </div>
+    <Provider store={appStore}>
+      <div className="app">
+        {/* Header - This can be called as <Header /> and also {Header()}*/}
+        <Header />
+        <Outlet />
+      </div>
+    </Provider>
   );
 };
 
