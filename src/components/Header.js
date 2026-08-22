@@ -9,6 +9,7 @@ import {
 import { LOGO_URL } from "../utils/constants";
 import { Link } from "react-router-dom";
 import { Grocery } from "../utils/lazyRoutes";
+import { useSelector } from "react-redux";
 
 // One shared pill shape for both <Link> and <button>, so a link and a button
 // sit at exactly the same height. Written once here rather than repeated on
@@ -22,6 +23,14 @@ const navLink = `${pill} text-ink-700 hover:text-brand hover:bg-brand-soft [&_sv
 
 const Header = () => {
   const [loginButton, setLoginButton] = useState("Login");
+
+  // Subscribing the store using the useSelector hook
+  const cartItems = useSelector((state) => state.cart.items);
+  console.log("cartItems", cartItems);
+
+  // A row can hold three of the same dish, so the badge sums the quantities
+  // rather than counting rows.
+  const itemCount = cartItems.reduce((sum, line) => sum + line.quantity, 0);
 
   // Start downloading the Grocery chunk the moment the pointer touches the
   // link, so it is usually cached before the click lands.
@@ -70,11 +79,22 @@ const Header = () => {
           </li>
           <li>
             <Link
-              className={`${pill} ml-1 md:ml-2 bg-ink-900 font-semibold text-surface hover:bg-brand [&_svg]:text-white/75 hover:[&_svg]:text-surface`}
+              className={`${pill} group ml-1 md:ml-2 bg-ink-900 font-semibold text-surface hover:bg-brand [&_svg]:text-white/75 hover:[&_svg]:text-surface`}
               to="/cart"
+              aria-label={`Cart, ${itemCount} ${
+                itemCount === 1 ? "item" : "items"
+              }`}
             >
               <CartIcon />
               <span className="hidden lg:inline">Cart</span>
+              {/* the count is its own chip on the end of the row, so it never
+                  sits on top of the icon. Inline, so it survives on mobile
+                  where the "Cart" label is hidden. */}
+              {itemCount > 0 && (
+                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold leading-none text-white transition-colors duration-200 ease-smooth group-hover:bg-surface group-hover:text-brand">
+                  {itemCount > 99 ? "99+" : itemCount}
+                </span>
+              )}
             </Link>
           </li>
           <li>
