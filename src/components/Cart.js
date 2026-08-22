@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { CloseIcon } from "./Icons";
 import PerksStrip from "./PerksStrip";
+import {
+  addItem,
+  clearCart,
+  deleteItem,
+  removeItem,
+} from "../utils/redux/cartSlice";
 import {
   btnGreen,
   card,
@@ -20,45 +27,6 @@ import {
   vegMark,
   vegMarkTone,
 } from "../utils/styles";
-
-// Seeded so the page has something to show. Real carts live in a store -
-// this is deliberately local, because cart state is not what this page is
-// demonstrating.
-const INITIAL_ITEMS = [
-  {
-    id: "ci1",
-    name: "Tandoori Paneer Pizza",
-    restaurant: "Pizza Hut",
-    unit: "Personal · Pan",
-    price: 369,
-    mrp: 449,
-    isVeg: true,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&q=80",
-  },
-  {
-    id: "ci2",
-    name: "Cheese Garlic Bread",
-    restaurant: "Pizza Hut",
-    unit: "6 pieces",
-    price: 165,
-    mrp: 199,
-    isVeg: true,
-    quantity: 2,
-    image: "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=300&q=80",
-  },
-  {
-    id: "ci3",
-    name: "Choco Volcano",
-    restaurant: "Pizza Hut",
-    unit: "Serves 1",
-    price: 119,
-    mrp: 149,
-    isVeg: true,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&q=80",
-  },
-];
 
 const SUGGESTIONS = [
   { id: "s1", name: "Masala Lemonade", price: 99, image: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=300&q=80" },
@@ -83,13 +51,21 @@ const PLATFORM_FEE = 6;
    ------------------------------------------------------------------ */
 const CartRow = ({ item, onAdd, onRemove, onDelete }) => (
   <div className="flex flex-wrap items-center gap-4 border-b border-line-soft py-4">
-    <img className="h-16 w-16 flex-none rounded-sm bg-line-soft object-cover" src={item.image} alt={item.name} loading="lazy" />
+    {/* not every dish has a photo, so the placeholder keeps the row the
+        same height either way */}
+    {item.image ? (
+      <img className="h-16 w-16 flex-none rounded-sm bg-line-soft object-cover" src={item.image} alt={item.name} loading="lazy" />
+    ) : (
+      <div className="flex h-16 w-16 flex-none items-center justify-center rounded-sm border border-dashed border-line bg-line-soft text-xl opacity-30" aria-hidden="true">
+        🍽️
+      </div>
+    )}
 
     <div className="min-w-0 flex-1">
       <span className={`${vegMark} ${vegMarkTone(item.isVeg)}`} />
       <h4 className="mb-[3px] mt-1.5 text-[14.5px] font-semibold">{item.name}</h4>
       <p className="text-xs text-ink-300">
-        {item.restaurant} · {item.unit}
+        {[item.restaurant, item.unit].filter(Boolean).join(" · ")}
       </p>
     </div>
 
@@ -120,26 +96,30 @@ const CartRow = ({ item, onAdd, onRemove, onDelete }) => (
    The page
    ------------------------------------------------------------------ */
 const Cart = () => {
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  // The cart no longer owns its data - it reads the store and dispatches.
+  // Which is why the count in the Header stays in sync for free.
+  const items = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
 
-  const addOne = (id) =>
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i)),
-    );
+  // addItem wants the whole dish, so we hand back the row we already hold.
+  const addOne = (id) => {
+    const line = items.find((i) => i.id === id);
+    if (line) dispatch(addItem(line));
+  };
 
-  const removeOne = (id) =>
-    setItems((prev) =>
-      prev
-        .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
-        .filter((i) => i.quantity > 0),
-    );
+  const removeOne = (id) => dispatch(removeItem(id));
+  const deleteLine = (id) => dispatch(deleteItem(id));
 
-  const deleteItem = (id) => setItems((prev) => prev.filter((i) => i.id !== id));
+  // The restaurant is the same for every line, so the first row can name it.
+  const restaurantName = items[0]?.restaurant;
 
   // Everything below is derived from items - nothing is stored twice
   const itemTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  // Swiggy's menu response carries no MRP, so mrp is usually absent and this
+  // comes out as zero. Kept because the seeded suggestions do have one.
   const savings = items.reduce(
-    (sum, i) => sum + (i.mrp - i.price) * i.quantity,
+    (sum, i) => sum + ((i.mrp ?? i.price) - i.price) * i.quantity,
     0,
   );
   const deliveryFee = itemTotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_FEE;
@@ -154,7 +134,9 @@ const Cart = () => {
         <h1 className={pageTitle}>Your cart</h1>
         <p className={pageSubtitle}>
           {items.length
-            ? `${itemCount} ${itemCount === 1 ? "item" : "items"} from Pizza Hut, Chhindwara City.`
+            ? `${itemCount} ${itemCount === 1 ? "item" : "items"}${
+                restaurantName ? ` from ${restaurantName}` : ""
+              }.`
             : "Nothing here yet — but that is easily fixed."}
         </p>
       </header>
@@ -177,9 +159,19 @@ const Cart = () => {
             <div className={sectionHead}>
               <div>
                 <h2 className={sectionTitle}>Order summary</h2>
-                <p className={sectionSub}>Pizza Hut · 45–50 mins</p>
+                <p className={sectionSub}>
+                  {restaurantName ? `${restaurantName} · ` : ""}45–50 mins
+                </p>
               </div>
-              <span className={sectionCount}>{itemCount} items</span>
+              <div className="flex items-center gap-3">
+                <span className={sectionCount}>{itemCount} items</span>
+                <button
+                  className="rounded-full border border-rating-poor px-3.5 py-[7px] text-xs font-bold tracking-wide text-rating-poor transition-colors duration-200 ease-smooth hover:bg-rating-poor hover:text-white"
+                  onClick={() => dispatch(clearCart())}
+                >
+                  CLEAR CART
+                </button>
+              </div>
             </div>
 
             {items.map((item) => (
@@ -188,7 +180,7 @@ const Cart = () => {
                 item={item}
                 onAdd={addOne}
                 onRemove={removeOne}
-                onDelete={deleteItem}
+                onDelete={deleteLine}
               />
             ))}
 
@@ -234,9 +226,11 @@ const Cart = () => {
 
             <button className="mt-[18px] w-full rounded-full bg-rating-good py-3.5 text-[14.5px] font-bold text-white transition hover:brightness-110">Proceed to pay ₹{grandTotal}</button>
 
-            <p className="mt-3 text-center text-xs text-rating-good">
-              You save <strong>₹{savings}</strong> on this order
-            </p>
+            {savings > 0 && (
+              <p className="mt-3 text-center text-xs text-rating-good">
+                You save <strong>₹{savings}</strong> on this order
+              </p>
+            )}
           </aside>
         </div>
       )}
