@@ -98,6 +98,15 @@ export const btnGreen =
   "disabled:text-ink-300 disabled:border-line disabled:cursor-not-allowed " +
   "disabled:hover:bg-surface";
 
+// Same shape as btnGreen, red instead - for the action that takes something
+// away, so it never reads as the one that adds.
+export const btnRed =
+  "rounded-lg border border-rating-poor bg-surface px-3.5 py-[7px] text-xs " +
+  "font-bold tracking-wide text-rating-poor cursor-pointer " +
+  "transition-colors duration-200 ease-smooth hover:bg-rating-poor hover:text-white " +
+  "disabled:text-ink-300 disabled:border-line disabled:cursor-not-allowed " +
+  "disabled:hover:bg-surface";
+
 /* ---------- rating pill ---------- */
 
 export const ratingPill =
