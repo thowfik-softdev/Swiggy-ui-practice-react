@@ -6,6 +6,7 @@ import { ClockIcon } from "./Icons";
 import { MenuSkeleton } from "./Skeleton";
 import {
   btnGreen,
+btnRed,
   pageShell,
   ratingPill,
   ratingTextTone,
@@ -13,15 +14,37 @@ import {
   vegMark,
   vegMarkTone,
 } from "../utils/styles";
+import { useDispatch, useSelector } from "react-redux";
+import { addItem, removeItem, toCartItem } from "../utils/redux/cartSlice";
 
 // Swiggy stores prices in paise, so 14900 means ₹149
 const toRupees = (paise) => `₹${Math.round(paise / 100)}`;
 
+// One size for the photo AND for the placeholder that stands in for a missing
+// photo, so a row never changes shape depending on whether the CDN answered.
+const IMAGE_BOX =
+  "block h-[160px] w-full rounded-md bg-line-soft object-cover " +
+  "sm:h-[92px] md:h-[118px]";
+
+// Both buttons sit in the same place, straddling the bottom edge of the image
+// box the way Swiggy does it. Only the colour differs, so they can never drift
+// out of alignment with each other.
+const BUTTON_POSITION =
+  "absolute bottom-0 left-1/2 min-w-[96px] -translate-x-1/2 " +
+  "whitespace-nowrap shadow-sm";
+
+const ADD_BUTTON = `${btnGreen} ${BUTTON_POSITION}`;
+const REMOVE_BUTTON = `${btnRed} ${BUTTON_POSITION}`;
+
 /* ------------------------------------------------------------------
    One dish row
    ------------------------------------------------------------------ */
-const MenuItem = ({ item }) => {
+const MenuItem = ({ item, restaurantName }) => {
+  // Keep the whole info object around, not just the fields we render - the
+  // cart needs it to build its own copy of the dish.
+  const info = item?.card?.info ?? {};
   const {
+    id,
     name,
     description,
     imageId,
@@ -31,7 +54,7 @@ const MenuItem = ({ item }) => {
     price,
     ratings,
     itemAttribute,
-  } = item?.card?.info ?? {};
+  } = info;
 
   // Not every dish has a photo, and the CDN sometimes rejects the request.
   // Track it so we can drop the image box rather than leave a grey hole.
@@ -41,6 +64,22 @@ const MenuItem = ({ item }) => {
   const rating = ratings?.aggregatedRating?.rating;
   const ratingCount = ratings?.aggregatedRating?.ratingCountV2;
   const soldOut = inStock === 0;
+
+  const dispatch = useDispatch();
+
+  // Subscribe to THIS dish's quantity only, not the whole cart. useSelector
+  // re-renders when its selected value changes, so adding a different dish
+  // no longer re-renders every row on the menu.
+  const quantity = useSelector(
+    (state) => state.cart.items.find((line) => line.id === id)?.quantity ?? 0,
+  );
+
+  // addItem carries the whole dish, because the cart has to be able to render
+  // it later without going back to the menu response.
+  const handleAddItem = () => dispatch(addItem(toCartItem(info, restaurantName)));
+
+  // removeItem only carries the id - that is all it takes to find the row.
+  const handleRemoveItem = () => dispatch(removeItem(id));
 
   return (
     <div
@@ -84,30 +123,44 @@ const MenuItem = ({ item }) => {
         )}
       </div>
 
-      <div
-        className={`relative flex-none ${
-          hasImage ? "w-full pb-[18px] sm:w-[104px] md:w-[140px]" : "w-auto"
-        }`}
-      >
-        {hasImage && (
+      {/* The media box is ALWAYS rendered at this size, photo or not. A dish
+          without a photo gets a placeholder of the exact same dimensions, so
+          every row keeps the same shape and the button always has a
+          positioned box to anchor to. Previously a photo-less dish collapsed
+          to w-auto with no height and the absolute button escaped the row. */}
+      <div className="relative w-full flex-none pb-[18px] sm:w-[104px] md:w-[140px]">
+        {hasImage ? (
           <img
-            className="block h-[160px] w-full rounded-md bg-line-soft object-cover sm:h-[92px] md:h-[118px]"
+            className={IMAGE_BOX}
             src={`${CDN_URL}${imageId}`}
             alt={name}
             loading="lazy"
             onError={() => setHasImage(false)}
           />
+        ) : (
+          <div
+            className={`${IMAGE_BOX} flex items-center justify-center border border-dashed border-line`}
+            aria-hidden="true"
+          >
+            <span className="text-[30px] leading-none opacity-25 sm:text-[22px] md:text-[26px]">
+              🍽️
+            </span>
+          </div>
         )}
-        <button
-          className={`${btnGreen} min-w-[96px] shadow-sm ${
-            hasImage
-              ? "absolute bottom-0 left-1/2 -translate-x-1/2"
-              : "static w-full sm:w-auto"
-          }`}
-          disabled={soldOut}
-        >
-          {soldOut ? "Sold out" : "ADD"}
-        </button>
+
+        {quantity > 0 ? (
+          <button className={REMOVE_BUTTON} onClick={handleRemoveItem}>
+            REMOVE{quantity > 1 && ` (${quantity})`}
+          </button>
+        ) : (
+          <button
+            className={ADD_BUTTON}
+            onClick={handleAddItem}
+            disabled={soldOut}
+          >
+            {soldOut ? "Sold out" : "ADD"}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -116,7 +169,7 @@ const MenuItem = ({ item }) => {
 /* ------------------------------------------------------------------
    One collapsible category
    ------------------------------------------------------------------ */
-const MenuCategory = ({ title, items, isOpen, onToggle }) => (
+const MenuCategory = ({ title, items, isOpen, onToggle, restaurantName }) => (
   <div className="border-b border-line">
     <button
       className="flex w-full items-center justify-between py-[18px] text-left text-[16.5px] font-bold text-ink-900 transition-colors hover:text-brand"
@@ -137,7 +190,11 @@ const MenuCategory = ({ title, items, isOpen, onToggle }) => (
     {isOpen && (
       <div className="pb-2">
         {items.map((item, index) => (
-          <MenuItem key={item?.card?.info?.id ?? index} item={item} />
+          <MenuItem
+            key={item?.card?.info?.id ?? index}
+            item={item}
+            restaurantName={restaurantName}
+          />
         ))}
       </div>
     )}
@@ -162,7 +219,9 @@ const RestaurantMenu = () => {
 
   if (!restaurant) {
     return (
-      <div className={`${pageShell} flex flex-col items-center pt-16 text-center`}>
+      <div
+        className={`${pageShell} flex flex-col items-center pt-16 text-center`}
+      >
         <span className="mb-4 text-[44px]">🍽️</span>
         <h2 className="mb-2 text-2xl font-bold tracking-tight">
           Menu not available
@@ -236,7 +295,9 @@ const RestaurantMenu = () => {
             </span>
           )}
           <span className="h-[3px] w-[3px] rounded-full bg-[#c9cad0]" />
-          <span className="font-semibold text-ink-700">{costForTwoMessage}</span>
+          <span className="font-semibold text-ink-700">
+            {costForTwoMessage}
+          </span>
         </div>
 
         {cuisines?.length > 0 && (
@@ -318,6 +379,7 @@ const RestaurantMenu = () => {
               onToggle={() =>
                 setOpenCategory(openCategory === index ? -1 : index)
               }
+              restaurantName={name}
             />
           ))
         )}
@@ -328,7 +390,9 @@ const RestaurantMenu = () => {
           <h2 className="mb-3.5 text-xl font-bold tracking-tight">
             About {name}
           </h2>
-          <p className="text-[13.5px] leading-relaxed text-ink-500">{address}</p>
+          <p className="text-[13.5px] leading-relaxed text-ink-500">
+            {address}
+          </p>
         </section>
       )}
     </div>
